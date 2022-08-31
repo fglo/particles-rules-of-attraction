@@ -7,8 +7,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/fglo/particlelifesim/pkg/particlelifesim/particle"
-	"github.com/fglo/particlelifesim/pkg/particlelifesim/rule"
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/rule"
 )
 
 type Board struct {

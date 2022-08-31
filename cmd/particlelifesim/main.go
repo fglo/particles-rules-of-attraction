@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/fglo/particlelifesim/pkg/particlelifesim/board"
-	"github.com/fglo/particlelifesim/pkg/particlelifesim/particle"
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/board"
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
 	"github.com/hajimehoshi/ebiten"
 )
 
