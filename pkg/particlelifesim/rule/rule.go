@@ -6,28 +6,28 @@ type Rule map[string]float64
 
 var RULES = map[string]Rule{
 	"green": {
-		"green":  rand.Float64()*4 - 2,
-		"red":    rand.Float64()*4 - 2,
-		"yellow": rand.Float64()*4 - 2,
-		"blue":   rand.Float64()*4 - 2,
+		"green":  rand.Float64()*3 - 1.5,
+		"red":    rand.Float64()*3 - 1.5,
+		"yellow": rand.Float64()*3 - 1.5,
+		"blue":   rand.Float64()*3 - 1.5,
 	},
 	"red": {
-		"green":  rand.Float64()*4 - 2,
-		"red":    rand.Float64()*4 - 2,
-		"yellow": rand.Float64()*4 - 2,
-		"blue":   rand.Float64()*4 - 2,
+		"green":  rand.Float64()*3 - 1.5,
+		"red":    rand.Float64()*3 - 1.5,
+		"yellow": rand.Float64()*3 - 1.5,
+		"blue":   rand.Float64()*3 - 1.5,
 	},
 	"yellow": {
-		"green":  rand.Float64()*4 - 2,
-		"red":    rand.Float64()*4 - 2,
-		"yellow": rand.Float64()*4 - 2,
-		"blue":   rand.Float64()*4 - 2,
+		"green":  rand.Float64()*3 - 1.5,
+		"red":    rand.Float64()*3 - 1.5,
+		"yellow": rand.Float64()*3 - 1.5,
+		"blue":   rand.Float64()*3 - 1.5,
 	},
 	"blue": {
-		"green":  rand.Float64()*4 - 2,
-		"red":    rand.Float64()*4 - 2,
-		"yellow": rand.Float64()*4 - 2,
-		"blue":   rand.Float64()*4 - 2,
+		"green":  rand.Float64()*3 - 1.5,
+		"red":    rand.Float64()*3 - 1.5,
+		"yellow": rand.Float64()*3 - 1.5,
+		"blue":   rand.Float64()*3 - 1.5,
 	},
 }
 
