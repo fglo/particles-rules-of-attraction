@@ -13,12 +13,12 @@ import (
 )
 
 type Board struct {
-	// image *ebiten.Image
-
 	Particles       []*particle.Particle
 	ParticlesByName map[string][]*particle.Particle
 	Width           int
 	Height          int
+
+	Rules map[string]rule.Rule
 }
 
 func New() *Board {
@@ -28,6 +28,7 @@ func New() *Board {
 	b.Height = 400
 	b.Particles = make([]*particle.Particle, 0)
 	b.ParticlesByName = make(map[string][]*particle.Particle)
+	b.Rules = rule.GetRules()
 
 	ebiten.SetWindowSize(b.Width*2, b.Height*2)
 	ebiten.SetWindowTitle("TRDQFGBJKNM")
@@ -63,7 +64,7 @@ func (b *Board) applyRule(particleName string) error {
 			if p1.Id == p2.Id {
 				continue
 			}
-			g := rule.RULES[p1.Name][p2.Name]
+			g := b.Rules[p1.Name][p2.Name]
 			dx := float64(p1.X - p2.X)
 			dy := float64(p1.Y - p2.Y)
 
