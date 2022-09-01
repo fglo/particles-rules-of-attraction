@@ -15,11 +15,13 @@ func init() {
 }
 
 func run() {
+	numberOfParticles := 1000
+
 	b := board.New()
-	b.CreateParticles("red", 500, particle.RED)
-	b.CreateParticles("green", 500, particle.GREEN)
-	b.CreateParticles("blue", 500, particle.BLUE)
-	b.CreateParticles("yellow", 500, particle.YELLOW)
+	b.CreateParticles("red", numberOfParticles, particle.RED)
+	b.CreateParticles("green", numberOfParticles, particle.GREEN)
+	b.CreateParticles("blue", numberOfParticles, particle.BLUE)
+	b.CreateParticles("yellow", numberOfParticles, particle.YELLOW)
 
 	if err := ebiten.RunGame(b); err != nil {
 		log.Fatal(err)

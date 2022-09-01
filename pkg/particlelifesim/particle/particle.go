@@ -1,14 +1,30 @@
 package particle
 
-import "image/color"
+import (
+	"image/color"
+
+	"github.com/google/uuid"
+)
 
 type Particle struct {
+	Id    uuid.UUID
 	Name  string
 	Y     int
 	X     int
 	Vx    float64
 	Vy    float64
 	Color color.Color
+}
+
+func New(name string, x, y int, color color.Color) *Particle {
+	p := new(Particle)
+	p.Id = uuid.New()
+	p.Name = name
+	p.X = x
+	p.Y = y
+	p.Color = color
+
+	return p
 }
 
 var RED = color.RGBA{

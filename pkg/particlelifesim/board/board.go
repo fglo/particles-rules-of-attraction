@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
+	"sync"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -14,9 +15,10 @@ import (
 type Board struct {
 	// image *ebiten.Image
 
-	Particles []*particle.Particle
-	Width     int
-	Height    int
+	Particles       []*particle.Particle
+	ParticlesByName map[string][]*particle.Particle
+	Width           int
+	Height          int
 }
 
 func New() *Board {
@@ -25,6 +27,7 @@ func New() *Board {
 	b.Width = 400
 	b.Height = 400
 	b.Particles = make([]*particle.Particle, 0)
+	b.ParticlesByName = make(map[string][]*particle.Particle)
 
 	ebiten.SetWindowSize(b.Width*2, b.Height*2)
 	ebiten.SetWindowTitle("TRDQFGBJKNM")
@@ -41,16 +44,23 @@ func (b *Board) randomY() int {
 }
 
 func (b *Board) CreateParticles(name string, numberOfParticles int, color color.Color) {
+	b.ParticlesByName[name] = make([]*particle.Particle, 0)
 	for i := 0; i < numberOfParticles; i++ {
-		b.Particles = append(b.Particles, &particle.Particle{Name: name, X: b.randomX(), Y: b.randomY(), Color: color})
+		p := particle.New(name, b.randomX(), b.randomY(), color)
+		b.Particles = append(b.Particles, p)
+		b.ParticlesByName[name] = append(b.ParticlesByName[name], p)
 	}
 }
 
-func (b *Board) applyRules() error {
-	for i, p1 := range b.Particles {
+var rulesWg sync.WaitGroup
+
+func (b *Board) applyRule(particleName string) error {
+	defer rulesWg.Done()
+
+	for _, p1 := range b.ParticlesByName[particleName] {
 		fx, fy := 0.0, 0.0
-		for j, p2 := range b.Particles {
-			if i == j {
+		for _, p2 := range b.Particles {
+			if p1.Id == p2.Id {
 				continue
 			}
 			g := rule.RULES[p1.Name][p2.Name]
@@ -80,7 +90,6 @@ func (b *Board) applyRules() error {
 			p1.Vx *= -1
 			p1.X = b.Width
 		}
-		// Y - axis
 		if p1.Y <= 0 {
 			p1.Vy *= -1
 			p1.Y = 0
@@ -90,6 +99,19 @@ func (b *Board) applyRules() error {
 			p1.Y = b.Height
 		}
 	}
+	return nil
+}
+
+func (b *Board) applyRules() error {
+	rulesWg.Add(4)
+
+	go b.applyRule("red")
+	go b.applyRule("green")
+	go b.applyRule("blue")
+	go b.applyRule("yellow")
+
+	rulesWg.Wait()
+
 	return nil
 }
 
