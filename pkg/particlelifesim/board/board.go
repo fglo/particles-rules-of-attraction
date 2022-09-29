@@ -82,7 +82,7 @@ func (b *Board) applyRule(p1Name string) error {
 			}
 		}
 
-		factor := 0.3
+		factor := 0.1
 
 		p1.Vx = (p1.Vx + fx) * factor
 		if p1.Vx >= 1 || p1.Vx <= -1 {

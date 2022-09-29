@@ -15,7 +15,7 @@ func init() {
 }
 
 func run() {
-	numberOfParticles := 1000
+	numberOfParticles := 1500
 
 	b := board.New()
 	b.CreateParticles("red", numberOfParticles, particle.RED)

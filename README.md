@@ -23,11 +23,17 @@ Different amounts of each color of particles:
 
 ![gif4](./img/gif4.gif)
 
+Other random results:
+
+![gif5](./img/gif5.gif)
+
+![gif6](./img/gif6.gif)
+
 ## Roadmap (if I have time and energy to put into it)
 
 - [ ] User Interface: changing rules live
 - [ ] User Interface: adding/removing new types (colors) of particles
 - [ ] User Interface: rules import/export
-- [ ] optimalizations :v
 - [x] computation parallelization
 - [ ] rule mutations
+- [ ] optimalizations :v (always ongoing)
