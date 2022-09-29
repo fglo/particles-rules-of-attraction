@@ -29,11 +29,5 @@ func run() {
 }
 
 func main() {
-	// var sourceCodePath string
-	// var prettyPrint bool
-	// flag.StringVar(&sourceCodePath, "f", "", "Source code file path.")
-	// flag.BoolVar(&prettyPrint, "p", false, "Pretty print the AST.")
-	// flag.Parse()
-
 	run()
 }
