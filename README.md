@@ -52,6 +52,8 @@ go run cmd/particlelifesim/main.go
 
 ### Web (bad performance tho)
 
+[simulation visualization (bad performance tho)](https://fglo.github.io/particles-rules-of-attraction/index.html)
+
 Compile the program to webasm and run a http server:
 
 ```bash
