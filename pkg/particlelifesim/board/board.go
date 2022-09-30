@@ -62,7 +62,6 @@ func (b *Board) applyRule(p1Name string) error {
 		fx, fy := 0.0, 0.0
 		for p2Name, pl := range b.ParticlesByName {
 			g := b.Rules[p1Name][p2Name]
-			// g := rule.RULES[p1Name][p2Name]
 			for i2, p2 := range pl.Particles {
 				if p1Name == p2Name && i1 == i2 {
 					continue
@@ -81,7 +80,7 @@ func (b *Board) applyRule(p1Name string) error {
 			}
 		}
 
-		factor := 0.1
+		factor := 0.08
 
 		p1.Vx = (p1.Vx + fx) * factor
 		if p1.Vx >= 1 || p1.Vx <= -1 {
@@ -112,7 +111,7 @@ func (b *Board) applyRule(p1Name string) error {
 	return nil
 }
 
-func (b *Board) applyRules() error {
+func (b *Board) applyRules() {
 	rulesWg.Add(len(b.ParticleNames))
 
 	for _, name := range b.ParticleNames {
@@ -120,8 +119,6 @@ func (b *Board) applyRules() error {
 	}
 
 	rulesWg.Wait()
-
-	return nil
 }
 
 func (b *Board) Init() {
@@ -135,9 +132,11 @@ func (b *Board) Update(screen *ebiten.Image) error {
 }
 
 func (b *Board) Draw(screen *ebiten.Image) {
-	screen.Clear()
-	screen.Fill(color.RGBA{9, 32, 42, 100})
+	_ = screen.Clear()
+	_ = screen.Fill(color.RGBA{9, 32, 42, 100})
+
 	b.applyRules()
+
 	for _, pl := range b.ParticlesByName {
 		for _, p := range pl.Particles {
 			screen.Set(p.X, p.Y, pl.Color)
