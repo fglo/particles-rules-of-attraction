@@ -2,7 +2,7 @@
 
 Program simulating particles' rules of attraction. 
 
-It's heavily inspired by [hunar4321's life_code](https://github.com/hunar4321/life_code) (still most of my code is just his javascript code ported to Go).
+It's heavily inspired by [hunar4321's life_code](https://github.com/hunar4321/life_code) (it started as a port of his javascript code).
 
 ## Gif
 
