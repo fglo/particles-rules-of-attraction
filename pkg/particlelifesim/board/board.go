@@ -55,7 +55,7 @@ func (b *Board) CreateParticles(name string, numberOfParticles int, color color.
 
 var rulesWg sync.WaitGroup
 
-func (b *Board) applyRule(p1Name string) error {
+func (b *Board) applyRule(p1Name string) {
 	defer rulesWg.Done()
 
 	for i1, p1 := range b.ParticlesByName[p1Name].Particles {
@@ -108,7 +108,6 @@ func (b *Board) applyRule(p1Name string) error {
 			}
 		}
 	}
-	return nil
 }
 
 func (b *Board) applyRules() {
