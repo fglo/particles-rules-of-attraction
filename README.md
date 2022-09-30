@@ -39,3 +39,29 @@ Other random results:
 - [x] computation parallelization
 - [ ] rule mutations
 - [ ] optimalizations :v (always ongoing)
+
+## Running simulation
+
+### Desktop
+
+Run the program using `go run` command:
+
+```bash
+go run cmd/particlelifesim/main.go
+```
+
+### Web (bad performance tho)
+
+Compile the program to webasm and run a http server:
+
+```bash
+GOOS=js GOARCH=wasm go build -o static/main.wasm cmd/particlelifesim/main.go
+python3 -m http.server --cgi 8080 --directory static/ 
+```
+
+or run the program using wasmserve
+
+```bash
+go install github.com/hajimehoshi/wasmserve@latest
+wasmserve ./cmd/particlelifesim/
+```
