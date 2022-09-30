@@ -1,3 +1,5 @@
+![Go Build](https://github.com/fglo/particles-rules-of-attraction/actions/workflows/go-build.yml/badge.svg)
+
 # Particles' Rules of Attraction Simulator
 
 Program simulating particles' rules of attraction. 
