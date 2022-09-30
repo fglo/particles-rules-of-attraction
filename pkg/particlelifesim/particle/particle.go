@@ -46,3 +46,17 @@ var YELLOW = color.RGBA{
 	B: 96,
 	A: 100,
 }
+
+var WHITE = color.RGBA{
+	R: 255,
+	G: 255,
+	B: 255,
+	A: 100,
+}
+
+var TEAL = color.RGBA{
+	R: 0,
+	G: 128,
+	B: 128,
+	A: 100,
+}

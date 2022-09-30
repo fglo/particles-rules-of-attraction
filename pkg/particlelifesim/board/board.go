@@ -14,7 +14,7 @@ import (
 
 type Board struct {
 	ParticlesByName map[string]*particle.ParticleList
-	particleNames   []string
+	ParticleNames   []string
 
 	Width  int
 	Height int
@@ -28,8 +28,7 @@ func New() *Board {
 	b.Width = 400
 	b.Height = 400
 	b.ParticlesByName = make(map[string]*particle.ParticleList)
-	b.Rules = rule.GetRules()
-	b.particleNames = make([]string, 0)
+	b.ParticleNames = make([]string, 0)
 
 	ebiten.SetWindowSize(b.Width*2, b.Height*2)
 	ebiten.SetWindowTitle("TRDQFGBJKNM")
@@ -46,7 +45,7 @@ func (b *Board) randomY() int {
 }
 
 func (b *Board) CreateParticles(name string, numberOfParticles int, color color.Color) {
-	b.particleNames = append(b.particleNames, name)
+	b.ParticleNames = append(b.ParticleNames, name)
 	b.ParticlesByName[name] = particle.NewList(name, color)
 	for i := 0; i < numberOfParticles; i++ {
 		p := particle.New(b.randomX(), b.randomY())
@@ -114,15 +113,21 @@ func (b *Board) applyRule(p1Name string) error {
 }
 
 func (b *Board) applyRules() error {
-	rulesWg.Add(len(b.particleNames))
+	rulesWg.Add(len(b.ParticleNames))
 
-	for _, name := range b.particleNames {
+	for _, name := range b.ParticleNames {
 		go b.applyRule(name)
 	}
 
 	rulesWg.Wait()
 
 	return nil
+}
+
+func (b *Board) Init() {
+	if b.Rules == nil {
+		b.Rules = rule.GenerateRandomRules(b.ParticleNames)
+	}
 }
 
 func (b *Board) Update(screen *ebiten.Image) error {
