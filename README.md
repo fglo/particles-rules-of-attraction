@@ -50,7 +50,7 @@ Run the program using `go run` command:
 go run cmd/particlelifesim/main.go
 ```
 
-### Web (bad performance tho)
+### Web
 
 [simulation visualization (bad performance tho)](https://fglo.github.io/particles-rules-of-attraction/index.html)
 

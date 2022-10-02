@@ -136,7 +136,7 @@ func (b *Board) applyRules() {
 }
 
 func (b *Board) Setup() {
-	numberOfParticles := 1200
+	numberOfParticles := 1000
 
 	b.CreateParticles("red", numberOfParticles, particle.RED)
 	b.CreateParticles("green", numberOfParticles, particle.GREEN)
