@@ -1,4 +1,5 @@
 ![Go Build](https://github.com/fglo/particles-rules-of-attraction/actions/workflows/go-build.yml/badge.svg)
+![Deploy Webasm](https://github.com/fglo/particles-rules-of-attraction/actions/workflows/deploy-webasm.yml/badge.svg)
 
 # Particles' Rules of Attraction Simulator
 
