@@ -155,7 +155,7 @@ func (b *Board) Restart() {
 
 func (b *Board) Update() error {
 	b.CheckRestartButton()
-	return b.CheckQuitButton()
+	return nil
 }
 
 func (b *Board) CheckQuitButton() error {
@@ -188,7 +188,6 @@ func (b *Board) Draw(screen *ebiten.Image) {
 func (b *Board) DrawInstructions(screen *ebiten.Image) {
 	instructions := []string{
 		"Press R to restart the simulation",
-		"Press Q to quit",
 	}
 	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }
