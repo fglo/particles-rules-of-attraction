@@ -1,14 +1,17 @@
 package board
 
 import (
+	"errors"
 	"image/color"
 	"math"
 	"math/rand"
+	"strings"
 	"sync"
 
 	"golang.org/x/exp/slices"
 
 	ebiten "github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
@@ -26,6 +29,7 @@ type Board struct {
 
 	Rules map[string]rule.Rule
 
+	quitIsPressed    bool
 	restartIsPressed bool
 }
 
@@ -150,6 +154,22 @@ func (b *Board) Restart() {
 }
 
 func (b *Board) Update() error {
+	b.CheckRestartButton()
+	return b.CheckQuitButton()
+}
+
+func (b *Board) CheckQuitButton() error {
+	if !b.quitIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		b.quitIsPressed = true
+	}
+	if b.quitIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyQ) {
+		b.quitIsPressed = false
+		return errors.New("terminated")
+	}
+	return nil
+}
+
+func (b *Board) CheckRestartButton() {
 	if !b.restartIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		b.restartIsPressed = true
 	}
@@ -157,23 +177,20 @@ func (b *Board) Update() error {
 		b.restartIsPressed = false
 		b.Restart()
 	}
-
-	return nil
 }
 
 func (b *Board) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{9, 32, 42, 100})
-	b.ParticlesImage.Clear()
+	b.DrawInstructions(screen)
+	b.DrawParticles(screen)
+}
 
-	b.applyRules()
-
-	for _, pl := range b.ParticlesByName {
-		for _, p := range pl.Particles {
-			b.ParticlesImage.Set(p.X, p.Y, pl.Color)
-		}
+func (b *Board) DrawInstructions(screen *ebiten.Image) {
+	instructions := []string{
+		"Press R to restart the simulation",
+		"Press Q to quit",
 	}
-
-	screen.DrawImage(b.ParticlesImage, &ebiten.DrawImageOptions{})
+	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }
 
 func (b *Board) DrawParticles(screen *ebiten.Image) {
