@@ -17,6 +17,9 @@ func run() {
 	g := game.New()
 
 	if err := ebiten.RunGame(g); err != nil {
+		if err == game.Terminated {
+			return
+		}
 		log.Fatal(err)
 	}
 }

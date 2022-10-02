@@ -22,6 +22,10 @@ const (
 	ScreenHeight = 400
 )
 
+var (
+	Terminated = errors.New("terminated")
+)
+
 type Game struct {
 	// input      *Input
 	board      *board.Board
@@ -61,7 +65,7 @@ func (g *Game) Update() error {
 	if err := g.board.Update(); err != nil {
 		return err
 	}
-	return nil
+	return g.checkQuitButton()
 }
 
 func (g *Game) checkQuitButton() error {
@@ -70,7 +74,7 @@ func (g *Game) checkQuitButton() error {
 	}
 	if g.quitIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyQ) {
 		g.quitIsPressed = false
-		return errors.New("terminated")
+		return Terminated
 	}
 	return nil
 }
