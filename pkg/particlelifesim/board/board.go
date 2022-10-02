@@ -187,7 +187,7 @@ func (b *Board) Draw(screen *ebiten.Image) {
 
 func (b *Board) DrawInstructions(screen *ebiten.Image) {
 	instructions := []string{
-		"Press R to restart the simulation",
+		" Press R to restart the simulation",
 	}
 	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }
