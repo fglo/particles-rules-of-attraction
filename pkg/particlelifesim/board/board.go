@@ -1,70 +1,94 @@
 package board
 
 import (
-	"errors"
 	"image/color"
 	"math"
 	"math/rand"
-	"strings"
 	"sync"
 
 	"golang.org/x/exp/slices"
 
 	ebiten "github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/rule"
 )
 
 type Board struct {
-	ParticlesByName map[string]*particle.ParticleList
-	ParticleNames   []string
+	particlesByName map[string]*particle.ParticleList
+	particleNames   []string
 
-	ParticlesImage *ebiten.Image
-
-	Width  int
-	Height int
+	width  int
+	height int
 
 	Rules map[string]rule.Rule
-
-	quitIsPressed    bool
-	restartIsPressed bool
 }
 
-func New() *Board {
+func New(w, h int) *Board {
 	b := new(Board)
 
-	b.Width = 400
-	b.Height = 400
-	b.ParticlesByName = make(map[string]*particle.ParticleList)
-	b.ParticleNames = make([]string, 0)
-	b.ParticlesImage = ebiten.NewImage(b.Width, b.Height)
-
-	ebiten.SetWindowSize(b.Width*2, b.Height*2)
-	ebiten.SetWindowTitle("Particles' Rules of Attraction")
+	b.width = w
+	b.height = h
+	b.particlesByName = make(map[string]*particle.ParticleList)
+	b.particleNames = make([]string, 0)
 
 	return b
 }
 
 func (b *Board) randomX() int {
-	return rand.Intn(b.Width-50) + 25
+	return rand.Intn(b.width-50) + 25
 }
 
 func (b *Board) randomY() int {
-	return rand.Intn(b.Height-50) + 25
+	return rand.Intn(b.height-50) + 25
 }
 
-func (b *Board) CreateParticles(name string, numberOfParticles int, color color.Color) {
-	if !slices.Contains(b.ParticleNames, name) {
-		b.ParticleNames = append(b.ParticleNames, name)
+func (b *Board) createParticles(name string, numberOfParticles int, color color.Color) {
+	if !slices.Contains(b.particleNames, name) {
+		b.particleNames = append(b.particleNames, name)
 	}
 
-	b.ParticlesByName[name] = particle.NewList(name, color)
+	b.particlesByName[name] = particle.NewList(name, color)
 	for i := 0; i < numberOfParticles; i++ {
 		p := particle.New(b.randomX(), b.randomY())
-		b.ParticlesByName[name].Particles = append(b.ParticlesByName[name].Particles, p)
+		b.particlesByName[name].Particles = append(b.particlesByName[name].Particles, p)
+	}
+}
+
+func (b *Board) Setup() {
+	numberOfParticles := 1000
+
+	b.createParticles("red", numberOfParticles, particle.RED)
+	b.createParticles("green", numberOfParticles, particle.GREEN)
+	b.createParticles("blue", numberOfParticles, particle.BLUE)
+	b.createParticles("yellow", numberOfParticles, particle.YELLOW)
+	b.createParticles("white", numberOfParticles, particle.WHITE)
+	b.createParticles("teal", numberOfParticles, particle.TEAL)
+
+	b.Rules = rule.GenerateRandomRules(b.particleNames)
+}
+
+func (b *Board) Update() error {
+	return nil
+}
+
+func (b *Board) Size() (w, h int) {
+	return b.width, b.height
+}
+
+func (b *Board) Draw(boardImage *ebiten.Image) {
+	b.drawParticles(boardImage)
+}
+
+func (b *Board) drawParticles(boardImage *ebiten.Image) {
+	boardImage.Clear()
+
+	b.applyRules()
+
+	for _, pl := range b.particlesByName {
+		for _, p := range pl.Particles {
+			boardImage.Set(p.X, p.Y, pl.Color)
+		}
 	}
 }
 
@@ -73,9 +97,9 @@ var rulesWg sync.WaitGroup
 func (b *Board) applyRule(p1Name string) {
 	defer rulesWg.Done()
 
-	for i1, p1 := range b.ParticlesByName[p1Name].Particles {
+	for i1, p1 := range b.particlesByName[p1Name].Particles {
 		fx, fy := 0.0, 0.0
-		for p2Name, pl := range b.ParticlesByName {
+		for p2Name, pl := range b.particlesByName {
 			g := b.Rules[p1Name][p2Name]
 			for i2, p2 := range pl.Particles {
 				if p1Name == p2Name && i1 == i2 {
@@ -104,9 +128,9 @@ func (b *Board) applyRule(p1Name string) {
 				p1.Vx *= -1
 				p1.X = 0
 			}
-			if p1.X >= b.Width {
+			if p1.X >= b.width {
 				p1.Vx *= -1
-				p1.X = b.Width
+				p1.X = b.width
 			}
 		}
 
@@ -117,95 +141,20 @@ func (b *Board) applyRule(p1Name string) {
 				p1.Vy *= -1
 				p1.Y = 0
 			}
-			if p1.Y >= b.Height {
+			if p1.Y >= b.height {
 				p1.Vy *= -1
-				p1.Y = b.Height
+				p1.Y = b.height
 			}
 		}
 	}
 }
 
 func (b *Board) applyRules() {
-	rulesWg.Add(len(b.ParticleNames))
+	rulesWg.Add(len(b.particleNames))
 
-	for _, name := range b.ParticleNames {
+	for _, name := range b.particleNames {
 		go b.applyRule(name)
 	}
 
 	rulesWg.Wait()
-}
-
-func (b *Board) Setup() {
-	numberOfParticles := 1000
-
-	b.CreateParticles("red", numberOfParticles, particle.RED)
-	b.CreateParticles("green", numberOfParticles, particle.GREEN)
-	b.CreateParticles("blue", numberOfParticles, particle.BLUE)
-	b.CreateParticles("yellow", numberOfParticles, particle.YELLOW)
-	b.CreateParticles("white", numberOfParticles, particle.WHITE)
-	b.CreateParticles("teal", numberOfParticles, particle.TEAL)
-
-	b.Rules = rule.GenerateRandomRules(b.ParticleNames)
-}
-
-func (b *Board) Restart() {
-	b.Setup()
-	b.ParticlesImage.Clear()
-}
-
-func (b *Board) Update() error {
-	b.CheckRestartButton()
-	return nil
-}
-
-func (b *Board) CheckQuitButton() error {
-	if !b.quitIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		b.quitIsPressed = true
-	}
-	if b.quitIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyQ) {
-		b.quitIsPressed = false
-		return errors.New("terminated")
-	}
-	return nil
-}
-
-func (b *Board) CheckRestartButton() {
-	if !b.restartIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		b.restartIsPressed = true
-	}
-	if b.restartIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyR) {
-		b.restartIsPressed = false
-		b.Restart()
-	}
-}
-
-func (b *Board) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{9, 32, 42, 100})
-	b.DrawInstructions(screen)
-	b.DrawParticles(screen)
-}
-
-func (b *Board) DrawInstructions(screen *ebiten.Image) {
-	instructions := []string{
-		" Press R to restart the simulation",
-	}
-	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
-}
-
-func (b *Board) DrawParticles(screen *ebiten.Image) {
-	b.ParticlesImage.Clear()
-
-	b.applyRules()
-
-	for _, pl := range b.ParticlesByName {
-		for _, p := range pl.Particles {
-			b.ParticlesImage.Set(p.X, p.Y, pl.Color)
-		}
-	}
-
-	screen.DrawImage(b.ParticlesImage, &ebiten.DrawImageOptions{})
-}
-
-func (b *Board) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return b.Width, b.Height
 }
