@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/board"
-	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
-	"github.com/hajimehoshi/ebiten"
+
+	ebiten "github.com/hajimehoshi/ebiten/v2"
 )
 
 func init() {
@@ -15,17 +15,9 @@ func init() {
 }
 
 func run() {
-	numberOfParticles := 1200
-
 	b := board.New()
-	b.CreateParticles("red", numberOfParticles, particle.RED)
-	b.CreateParticles("green", numberOfParticles, particle.GREEN)
-	b.CreateParticles("blue", numberOfParticles, particle.BLUE)
-	b.CreateParticles("yellow", numberOfParticles, particle.YELLOW)
-	b.CreateParticles("white", numberOfParticles, particle.WHITE)
-	b.CreateParticles("teal", numberOfParticles, particle.TEAL)
+	b.Setup()
 
-	b.Init()
 	if err := ebiten.RunGame(b); err != nil {
 		log.Fatal(err)
 	}
