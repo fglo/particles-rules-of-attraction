@@ -36,7 +36,6 @@ type Game struct {
 	restartIsPressed bool
 	pauseIsPressed   bool
 	forwardIsPressed bool
-	reverseIsPressed bool
 }
 
 // New generates a new Game object.
