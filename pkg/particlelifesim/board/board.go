@@ -144,7 +144,7 @@ func (b *Board) applyRule(p1Name string) {
 			p1.X += int(p1.Vx)
 			if p1.X <= 0 {
 				p1.Vx *= -1
-				p1.X = 1
+				p1.X = 0
 			} else if p1.X >= b.width {
 				p1.Vx *= -1
 				p1.X = b.width - 1
@@ -156,7 +156,7 @@ func (b *Board) applyRule(p1Name string) {
 			p1.Y += int(p1.Vy)
 			if p1.Y <= 0 {
 				p1.Vy *= -1
-				p1.Y = 1
+				p1.Y = 0
 			} else if p1.Y >= b.height {
 				p1.Vy *= -1
 				p1.Y = b.height - 1
