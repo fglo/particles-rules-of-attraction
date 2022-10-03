@@ -17,6 +17,9 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 ## Build:
+run:
+	go run cmd/particlelifesim/main.go
+
 build: ## Build your project and put the output binary in out/bin/
 	mkdir -p out/bin
 #    GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/$(BINARY_NAME) $(PATH_TO_MAIN_GO)

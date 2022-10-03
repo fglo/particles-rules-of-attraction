@@ -26,6 +26,7 @@ var (
 	Terminated = errors.New("terminated")
 )
 
+// Game encapsulates game logic
 type Game struct {
 	// input      *Input
 	board      *board.Board

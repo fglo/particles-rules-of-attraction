@@ -1,7 +1,7 @@
 package board
 
 import (
-	"image/color"
+	image "image/color"
 	"math"
 	"math/rand"
 	"sync"
@@ -10,10 +10,12 @@ import (
 
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/color"
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/rule"
 )
 
+// Board encapsulates simulation logic
 type Board struct {
 	particlesByName map[string]*particle.ParticleList
 	particleNames   []string
@@ -21,9 +23,10 @@ type Board struct {
 	width  int
 	height int
 
-	Rules map[string]rule.Rule
+	rules map[string]rule.Rule
 }
 
+// New is a Board constructor
 func New(w, h int) *Board {
 	b := new(Board)
 
@@ -43,7 +46,7 @@ func (b *Board) randomY() int {
 	return rand.Intn(b.height-50) + 25
 }
 
-func (b *Board) createParticles(name string, numberOfParticles int, color color.Color) {
+func (b *Board) createParticles(name string, numberOfParticles int, color image.Color) {
 	if !slices.Contains(b.particleNames, name) {
 		b.particleNames = append(b.particleNames, name)
 	}
@@ -55,27 +58,31 @@ func (b *Board) createParticles(name string, numberOfParticles int, color color.
 	}
 }
 
+// Setup prepares board
 func (b *Board) Setup() {
 	numberOfParticles := 1000
 
-	b.createParticles("red", numberOfParticles, particle.RED)
-	b.createParticles("green", numberOfParticles, particle.GREEN)
-	b.createParticles("blue", numberOfParticles, particle.BLUE)
-	b.createParticles("yellow", numberOfParticles, particle.YELLOW)
-	b.createParticles("white", numberOfParticles, particle.WHITE)
-	b.createParticles("teal", numberOfParticles, particle.TEAL)
+	b.createParticles("red", numberOfParticles, color.RED)
+	b.createParticles("green", numberOfParticles, color.GREEN)
+	b.createParticles("blue", numberOfParticles, color.BLUE)
+	b.createParticles("yellow", numberOfParticles, color.YELLOW)
+	b.createParticles("white", numberOfParticles, color.WHITE)
+	b.createParticles("teal", numberOfParticles, color.TEAL)
 
-	b.Rules = rule.GenerateRandomRules(b.particleNames)
+	b.rules = rule.GenerateRandomRules(b.particleNames)
 }
 
+// Update performs board updates
 func (b *Board) Update() error {
 	return nil
 }
 
+// Size returns board size
 func (b *Board) Size() (w, h int) {
 	return b.width, b.height
 }
 
+// Draw draws board
 func (b *Board) Draw(boardImage *ebiten.Image) {
 	b.drawParticles(boardImage)
 }
@@ -92,19 +99,30 @@ func (b *Board) drawParticles(boardImage *ebiten.Image) {
 	}
 }
 
-var rulesWg sync.WaitGroup
+func (b *Board) applyRules() {
+	var rulesWg sync.WaitGroup
+	rulesWg.Add(len(b.particleNames))
+
+	for _, name := range b.particleNames {
+		go func(name string) {
+			defer rulesWg.Done()
+			b.applyRule(name)
+		}(name)
+	}
+
+	rulesWg.Wait()
+}
 
 func (b *Board) applyRule(p1Name string) {
-	defer rulesWg.Done()
-
 	for i1, p1 := range b.particlesByName[p1Name].Particles {
 		fx, fy := 0.0, 0.0
 		for p2Name, pl := range b.particlesByName {
-			g := b.Rules[p1Name][p2Name]
+			g := b.getAttractionForceBetweenParticles(p1Name, p2Name)
 			for i2, p2 := range pl.Particles {
-				if p1Name == p2Name && i1 == i2 {
+				if i1 == i2 && p1Name == p2Name {
 					continue
 				}
+
 				dx := float64(p1.X - p2.X)
 				dy := float64(p1.Y - p2.Y)
 
@@ -119,18 +137,17 @@ func (b *Board) applyRule(p1Name string) {
 			}
 		}
 
-		factor := 0.08
+		factor := 0.1
 
 		p1.Vx = (p1.Vx + fx) * factor
 		if p1.Vx >= 1 || p1.Vx <= -1 {
 			p1.X += int(p1.Vx)
 			if p1.X <= 0 {
 				p1.Vx *= -1
-				p1.X = 0
-			}
-			if p1.X >= b.width {
+				p1.X = 1
+			} else if p1.X >= b.width {
 				p1.Vx *= -1
-				p1.X = b.width
+				p1.X = b.width - 1
 			}
 		}
 
@@ -139,22 +156,15 @@ func (b *Board) applyRule(p1Name string) {
 			p1.Y += int(p1.Vy)
 			if p1.Y <= 0 {
 				p1.Vy *= -1
-				p1.Y = 0
-			}
-			if p1.Y >= b.height {
+				p1.Y = 1
+			} else if p1.Y >= b.height {
 				p1.Vy *= -1
-				p1.Y = b.height
+				p1.Y = b.height - 1
 			}
 		}
 	}
 }
 
-func (b *Board) applyRules() {
-	rulesWg.Add(len(b.particleNames))
-
-	for _, name := range b.particleNames {
-		go b.applyRule(name)
-	}
-
-	rulesWg.Wait()
+func (b *Board) getAttractionForceBetweenParticles(p1Name, p2Name string) float64 {
+	return b.rules[p1Name][p2Name]
 }
