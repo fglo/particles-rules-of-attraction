@@ -24,6 +24,10 @@ type Board struct {
 	height int
 
 	rules map[string]rule.Rule
+
+	paused    bool
+	forwarded bool
+	// reversed  bool
 }
 
 // New is a Board constructor
@@ -70,6 +74,17 @@ func (b *Board) Setup() {
 	b.createParticles("teal", numberOfParticles, color.TEAL)
 
 	b.rules = rule.GenerateRandomRules(b.particleNames)
+	b.paused = false
+}
+
+// TogglePause toggles board pause
+func (b *Board) TogglePause() {
+	b.paused = !b.paused
+}
+
+// Forward sets forward
+func (b *Board) Forward(forward bool) {
+	b.forwarded = forward
 }
 
 // Update performs board updates
@@ -88,13 +103,13 @@ func (b *Board) Draw(boardImage *ebiten.Image) {
 }
 
 func (b *Board) drawParticles(boardImage *ebiten.Image) {
-	boardImage.Clear()
-
-	b.applyRules()
-
-	for _, pl := range b.particlesByName {
-		for _, p := range pl.Particles {
-			boardImage.Set(p.X, p.Y, pl.Color)
+	if !b.paused || b.forwarded {
+		boardImage.Clear()
+		b.applyRules()
+		for _, pl := range b.particlesByName {
+			for _, p := range pl.Particles {
+				boardImage.Set(p.X, p.Y, pl.Color)
+			}
 		}
 	}
 }

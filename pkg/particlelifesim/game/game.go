@@ -34,6 +34,9 @@ type Game struct {
 
 	quitIsPressed    bool
 	restartIsPressed bool
+	pauseIsPressed   bool
+	forwardIsPressed bool
+	reverseIsPressed bool
 }
 
 // New generates a new Game object.
@@ -62,6 +65,8 @@ func (g *Game) restart() {
 // Update updates the current game state.
 func (g *Game) Update() error {
 	g.checkRestartButton()
+	g.checkPauseButton()
+	g.checkForwardButton()
 	// g.input.Update()
 	if err := g.board.Update(); err != nil {
 		return err
@@ -90,6 +95,27 @@ func (g *Game) checkRestartButton() {
 	}
 }
 
+func (g *Game) checkPauseButton() {
+	if !g.pauseIsPressed && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.pauseIsPressed = true
+	}
+	if g.pauseIsPressed && inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		g.pauseIsPressed = false
+		g.board.TogglePause()
+	}
+}
+
+func (g *Game) checkForwardButton() {
+	if !g.forwardIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
+		g.forwardIsPressed = true
+		g.board.Forward(true)
+	}
+	if g.forwardIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyArrowRight) {
+		g.forwardIsPressed = false
+		g.board.Forward(false)
+	}
+}
+
 // Draw draws the current game to the given screen.
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.boardImage == nil {
@@ -113,6 +139,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) drawInstructions(screen *ebiten.Image) {
 	instructions := []string{
 		" Press R to restart the simulation",
+		" Press Space to pause/unpause the simulation",
+		" Press and hold -> to play paused simulation",
+		" Press Q to quit",
 	}
 	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }
