@@ -14,13 +14,14 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
         cache: true
 
     - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
+        version: 1.0
 
     - name: Compile
       run: GOOS=js GOARCH=wasm go build -tags wasm -o static/main.wasm cmd/particlelifesim/main.go

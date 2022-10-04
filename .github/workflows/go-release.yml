@@ -1,16 +1,24 @@
-name: Go Lint
+name: goreleaser
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+  # packages: write
+  # issues: write
 
 jobs:
-  lint:
+  goreleaser:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        
+    - run: git fetch --force --tags
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -24,5 +32,11 @@ jobs:
         packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
         version: 1.0
 
-    - name: Lint
-      uses: golangci/golangci-lint-action@v3.2.0
+    - name: Release
+      uses: goreleaser/goreleaser-action@v2
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --rm-dist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

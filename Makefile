@@ -17,7 +17,7 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 ## Build:
-run:
+run: ## Run project
 	go run cmd/particlelifesim/main.go
 
 build: ## Build your project and put the output binary in out/bin/
@@ -35,12 +35,24 @@ vendor: ## Copy of all packages needed to support builds and tests in the vendor
 watch: ## Run the code with cosmtrek/air to have automatic reload on changes
 	air  --build.cmd "go build -o out/bin/$(BINARY_NAME) $(PATH_TO_MAIN_GO)" --build.bin "./out/bin/particlelifesim"
 
-wasmserve:
+wasmserve: ## Run app as webapp
 	wasmserve -tags wasm ./cmd/particlelifesim/
 
 ## Test:
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./... $(OUTPUT_OPTIONS)
+
+## Format:
+tidy: ## go mod tidy
+	go mod tidy
+
+fmt: ## go mod fmt
+	go fmt ./...
+
+vet: ## go mod vet
+	go vet ./...
+
+format: tidy fmt vet ## format
 
 ## Help:
 help: ## Show this help.
