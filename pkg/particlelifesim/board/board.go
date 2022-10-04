@@ -152,6 +152,36 @@ func (b *Board) applyRule(p1Name string) {
 			}
 		}
 
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			cursorPosX, cursorPosY := ebiten.CursorPosition()
+
+			g := -32.0
+
+			dx := float64(p1.X - cursorPosX)
+			dy := float64(p1.Y - cursorPosY)
+
+			if dx != 0 || dy != 0 {
+				d := dx*dx + dy*dy
+				F := g / math.Sqrt(d)
+				fx += F * dx
+				fy += F * dy
+			}
+		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+			cursorPosX, cursorPosY := ebiten.CursorPosition()
+
+			g := 32.0
+
+			dx := float64(p1.X - cursorPosX)
+			dy := float64(p1.Y - cursorPosY)
+
+			if dx != 0 || dy != 0 {
+				d := dx*dx + dy*dy
+				F := g / math.Sqrt(d)
+				fx += F * dx
+				fy += F * dy
+			}
+		}
+
 		factor := 0.1
 
 		p1.Vx = (p1.Vx + fx) * factor
