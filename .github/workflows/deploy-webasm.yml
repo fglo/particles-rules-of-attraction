@@ -23,7 +23,7 @@ jobs:
         sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
 
     - name: Compile
-      run: GOOS=js GOARCH=wasm go build -o static/main.wasm cmd/particlelifesim/main.go
+      run: GOOS=js GOARCH=wasm go build -tags wasm -o static/main.wasm cmd/particlelifesim/main.go
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3

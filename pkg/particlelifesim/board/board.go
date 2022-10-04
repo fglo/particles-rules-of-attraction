@@ -63,9 +63,7 @@ func (b *Board) createParticles(name string, numberOfParticles int, color image.
 }
 
 // Setup prepares board
-func (b *Board) Setup() {
-	numberOfParticles := 1000
-
+func (b *Board) Setup(numberOfParticles int) {
 	b.createParticles("red", numberOfParticles, color.RED)
 	b.createParticles("green", numberOfParticles, color.GREEN)
 	b.createParticles("blue", numberOfParticles, color.BLUE)
@@ -155,7 +153,7 @@ func (b *Board) applyRule(p1Name string) {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			cursorPosX, cursorPosY := ebiten.CursorPosition()
 
-			g := -32.0
+			g := -64.0
 
 			dx := float64(p1.X - cursorPosX)
 			dy := float64(p1.Y - cursorPosY)
@@ -169,7 +167,7 @@ func (b *Board) applyRule(p1Name string) {
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
 			cursorPosX, cursorPosY := ebiten.CursorPosition()
 
-			g := 32.0
+			g := 64.0
 
 			dx := float64(p1.X - cursorPosX)
 			dy := float64(p1.Y - cursorPosY)

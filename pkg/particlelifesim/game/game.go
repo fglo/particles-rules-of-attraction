@@ -17,11 +17,6 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-const (
-	ScreenWidth  = 400
-	ScreenHeight = 400
-)
-
 var (
 	Terminated = errors.New("terminated")
 )
@@ -32,6 +27,10 @@ type Game struct {
 	board      *board.Board
 	boardImage *ebiten.Image
 
+	screenWidth       int
+	screenHeight      int
+	numberOfParticles int
+
 	quitIsPressed    bool
 	restartIsPressed bool
 	pauseIsPressed   bool
@@ -41,11 +40,15 @@ type Game struct {
 // New generates a new Game object.
 func New() *Game {
 	g := new(Game)
-	// g.input =  NewInput()
-	g.board = board.New(ScreenWidth, ScreenHeight)
-	g.board.Setup()
+	g.screenWidth = screenWidth
+	g.screenHeight = screenHeight
+	g.numberOfParticles = numberOfParticles
 
-	ebiten.SetWindowSize(ScreenWidth*2, ScreenHeight*2)
+	// g.input =  NewInput()
+	g.board = board.New(g.screenWidth, g.screenHeight)
+	g.board.Setup(g.numberOfParticles)
+
+	ebiten.SetWindowSize(g.screenWidth*2, g.screenHeight*2)
 	ebiten.SetWindowTitle("Particles' Rules of Attraction")
 
 	return g
@@ -53,11 +56,11 @@ func New() *Game {
 
 // Layout implements ebiten.Game's Layout.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return ScreenWidth, ScreenHeight
+	return g.screenWidth, g.screenHeight
 }
 
 func (g *Game) restart() {
-	g.board.Setup()
+	g.board.Setup(g.numberOfParticles)
 	g.boardImage.Clear()
 }
 
@@ -95,21 +98,21 @@ func (g *Game) checkRestartButton() {
 }
 
 func (g *Game) checkPauseButton() {
-	if !g.pauseIsPressed && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+	if !g.pauseIsPressed && (inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace)) {
 		g.pauseIsPressed = true
 	}
-	if g.pauseIsPressed && inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+	if g.pauseIsPressed && (inpututil.IsKeyJustReleased(ebiten.KeyP) || inpututil.IsKeyJustReleased(ebiten.KeySpace)) {
 		g.pauseIsPressed = false
 		g.board.TogglePause()
 	}
 }
 
 func (g *Game) checkForwardButton() {
-	if !g.forwardIsPressed && inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
+	if !g.forwardIsPressed && (inpututil.IsKeyJustPressed(ebiten.KeyF) || inpututil.IsKeyJustPressed(ebiten.KeyArrowRight)) {
 		g.forwardIsPressed = true
 		g.board.Forward(true)
 	}
-	if g.forwardIsPressed && inpututil.IsKeyJustReleased(ebiten.KeyArrowRight) {
+	if g.forwardIsPressed && (inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyArrowRight)) {
 		g.forwardIsPressed = false
 		g.board.Forward(false)
 	}
@@ -137,10 +140,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) drawInstructions(screen *ebiten.Image) {
 	instructions := []string{
-		" Press R to restart the simulation",
-		" Press Space to pause/unpause the simulation",
-		" Press and hold -> to play paused simulation",
-		" Press Q to quit",
+		" P: pause/unpause",
+		" F: play paused sim",
+		" R: restart",
+		" Q: quit",
 	}
 	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }
