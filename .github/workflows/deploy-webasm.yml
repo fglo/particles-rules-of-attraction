@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
         packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
         version: 1.0
 
-    - name: Compile
+    - name: Build
       run: GOOS=js GOARCH=wasm go build -tags wasm -o static/main.wasm cmd/particlelifesim/main.go
 
     - name: Deploy
