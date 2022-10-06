@@ -12,7 +12,11 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -27,16 +31,38 @@ jobs:
         cache: true
 
     - name: Install dependencies
+      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
         packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
         version: 1.0
 
     - name: Release
+      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       uses: goreleaser/goreleaser-action@v2
       with:
         distribution: goreleaser
         version: latest
-        args: release -f .goreleaser.yml --rm-dist
+        args: release -f .github/.goreleaser.linux.yml --rm-dist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release
+      if: ${{ startsWith(matrix.os, 'macos-') }}
+      uses: goreleaser/goreleaser-action@v2
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release -f .github/.goreleaser.macos.yml --rm-dist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release
+      if: ${{ startsWith(matrix.os, 'windows-') }}
+      uses: goreleaser/goreleaser-action@v2
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release -f .github/.goreleaser.windows.yml --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
