@@ -55,7 +55,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'windows-') }}
       run: |
         GOOS=windows GOARCH=amd64 go build -o particlelifesim-windows-amd64 cmd/particlelifesim/main.go
-        GOOS=windows GOARCH=amd go build -o particlelifesim-windows-amd cmd/particlelifesim/main.go
+        GOOS=windows GOARCH=386 go build -o particlelifesim-windows-amd cmd/particlelifesim/main.go
 
     - name: Build (Wasm)
       run: |
