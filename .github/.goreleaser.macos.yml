@@ -1,0 +1,8 @@
+# .goreleaser.yml
+project_name: particlelifesim
+builds:
+    id: "particlelifesim"
+    binary: particlelifesim
+    main: ./cmd/particlelifesim
+    goos:
+      - darwin

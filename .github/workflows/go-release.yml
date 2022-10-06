@@ -37,7 +37,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
-        packages: libasound2-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libc6-dev
+        packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev 
         version: 1.0
 
     - name: Release (Linux)
@@ -46,7 +46,7 @@ jobs:
       with:
         distribution: goreleaser
         version: latest
-        args: release -f .github/.goreleaser.yml --rm-dist
+        args: release -f .github/.goreleaser.linux.yml --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,7 +56,7 @@ jobs:
       with:
         distribution: goreleaser
         version: latest
-        args: release -f .github/.goreleaser.yml --rm-dist
+        args: release -f .github/.goreleaser.macos.yml --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,6 +66,6 @@ jobs:
       with:
         distribution: goreleaser
         version: latest
-        args: release -f .github/.goreleaser.yml --rm-dist
+        args: release -f .github/.goreleaser.windows.yml --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
