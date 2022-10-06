@@ -30,7 +30,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
-        packages: libasound2-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libc6-dev gcc-multilib
+        packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev 
         version: 1.0
 
     - name: Test
@@ -42,20 +42,17 @@ jobs:
     - name: Build (Linux)
       if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       run: |
-        CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o particlelifesim-linux-arm64 cmd/particlelifesim/main.go
-        CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -o particlelifesim-linux-arm64 cmd/particlelifesim/main.go
+        go build -o particlelifesim-linux-arm64 cmd/particlelifesim/main.go
 
     - name: Build (macOS)
       if: ${{ startsWith(matrix.os, 'macos-') }}
       run: |
-        CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o particlelifesim-macos-amd64 cmd/particlelifesim/main.go
-        CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -o particlelifesim-macos-arm64 cmd/particlelifesim/main.go
+        go build -o particlelifesim-macos-amd64 cmd/particlelifesim/main.go
 
     - name: Build (Windows)
       if: ${{ startsWith(matrix.os, 'windows-') }}
       run: |
-        GOOS=windows GOARCH=amd64 go build -o particlelifesim-windows-amd64 cmd/particlelifesim/main.go
-        GOOS=windows GOARCH=386 go build -o particlelifesim-windows-amd cmd/particlelifesim/main.go
+        go build -o particlelifesim-windows-amd64 cmd/particlelifesim/main.go
 
     - name: Build (Wasm)
       run: |
