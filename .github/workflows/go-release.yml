@@ -94,15 +94,6 @@ jobs:
       with:
         token: ${{ github.token }}
         tag: ${{ github.ref_name }}
-
-    - name: Generate changelog
-      id: changelog
-      uses: TriPSs/conventional-changelog-action@v3
-      with:
-        github-token: ${{ github.token }}
-        skip-version-file: true
-        skip-git-pull: true
-        skip-commit: true
       
     - name: Release
       uses: softprops/action-gh-release@v1
