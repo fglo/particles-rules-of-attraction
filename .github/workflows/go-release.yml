@@ -1,22 +1,82 @@
-name: goreleaser
+name: Go Release
 
 on:
   push:
     tags:
       - '*'
 
-permissions:
-  contents: write
-  # packages: write
-  # issues: write
-
 jobs:
-  goreleaser:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+
+  build-linux:
+    name: Build on ubuntu-latest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+        cache: true
+
+    - name: Install dependencies
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev 
+        version: 1.0
+
+    - name: Build (Linux)
+      run: |
+        go build -o out/bin/particlelifesim-linux cmd/particlelifesim/main.go
+
+    - name: Build (Wasm)
+      run: |
+        GOOS=js GOARCH=wasm go build -tags wasm -o out/bin/particlelifesim.wasm cmd/particlelifesim/main.go
+
+  build-macos:
+    name: Build on macos-latest
+    runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+        cache: true
+
+    - name: Build (macOS)
+      run: |
+        go build -o out/bin/particlelifesim-macos cmd/particlelifesim/main.go
+
+  build-windows:
+    name: Build on windows-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+        cache: true
+
+    - name: Build (Windows)
+      run: |
+        go build -o out/bin/particlelifesim-windows cmd/particlelifesim/main.go
+
+  releases:
+    name: Release
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -27,45 +87,29 @@ jobs:
         
     - run: git fetch --force --tags
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
+    - uses: actions-ecosystem/action-get-latest-tag@v1
+      id: get-latest-tag
       with:
-        go-version: 1.19
-        cache: true
+        semver_only: true      
 
-    - name: Install dependencies
-      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-      uses: awalsh128/cache-apt-pkgs-action@latest
+    - name: Generate changelog
+      id: changelog
+      uses: TriPSs/conventional-changelog-action@v3
       with:
-        packages: libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev 
-        version: 1.0
-
-    - name: Release (Linux)
-      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-      uses: goreleaser/goreleaser-action@v2
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        skip-version-file: true
+      
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        distribution: goreleaser
-        version: latest
-        args: release -f .github/.goreleaser.linux.yml --rm-dist
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Release (macOS)
-      if: ${{ startsWith(matrix.os, 'macos-') }}
-      uses: goreleaser/goreleaser-action@v2
-      with:
-        distribution: goreleaser
-        version: latest
-        args: release -f .github/.goreleaser.macos.yml --rm-dist
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Release (Windows)
-      if: ${{ startsWith(matrix.os, 'windows-') }}
-      uses: goreleaser/goreleaser-action@v2
-      with:
-        distribution: goreleaser
-        version: latest
-        args: release -f .github/.goreleaser.windows.yml --rm-dist
+        name: ${{ steps.get-latest-tag.outputs.tag }}
+        tag_name: ${{ steps.get-latest-tag.outputs.tag }}
+        body: ${{ steps.changelog.outputs.clean_changelog }}
+        files: |
+          out/bin/particlelifesim-linux
+          out/bin/particlelifesim-macos
+          out/bin/particlelifesim-windows
+          out/bin/particlelifesim.wasm
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
