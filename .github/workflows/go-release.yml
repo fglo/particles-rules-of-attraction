@@ -114,6 +114,9 @@ jobs:
       with:
         path: out/bin/
 
+    - name: Display structure of downloaded files
+      run: ls -R
+
     - name: Update CHANGELOG
       id: changelog
       uses: Requarks/changelog-action@v1
