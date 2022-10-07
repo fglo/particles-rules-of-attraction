@@ -114,9 +114,6 @@ jobs:
       with:
         path: out/bin/
 
-    - name: Display structure of downloaded files
-      run: ls -R
-
     - name: Update CHANGELOG
       id: changelog
       uses: Requarks/changelog-action@v1
@@ -142,7 +139,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-linux
+        asset_path: ./out/bin/particlelifesim-linux/particlelifesim-linux
         asset_name: particlelifesim-linux
         asset_content_type: application/gzip
 
@@ -152,7 +149,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim.wasm
+        asset_path: ./out/bin/particlelifesim-wasm/particlelifesim.wasm
         asset_name: particlelifesim.wasm
         asset_content_type: application/gzip
 
@@ -162,7 +159,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-macos.app
+        asset_path: ./out/bin/particlelifesim-macos/particlelifesim-macos.app
         asset_name: particlelifesim-macos.app
         asset_content_type: application/gzip
 
@@ -172,6 +169,6 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-windows.exe
+        asset_path: ./out/bin/particlelifesim-windows/particlelifesim-windows.exe
         asset_name: particlelifesim-windows.exe
         asset_content_type: application/gzip
