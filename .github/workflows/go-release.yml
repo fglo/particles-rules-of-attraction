@@ -36,6 +36,16 @@ jobs:
       run: |
         GOOS=js GOARCH=wasm go build -tags wasm -o out/bin/particlelifesim.wasm cmd/particlelifesim/main.go
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: particlelifesim-linux
+        path: out/bin/particlelifesim-linux
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: particlelifesim-wasm
+        path: out/bin/particlelifesim.wasm
+
   build-macos:
     name: Build on macos-latest
     runs-on: macos-latest
@@ -54,6 +64,11 @@ jobs:
     - name: Build (macOS)
       run: |
         go build -o out/bin/particlelifesim-macos cmd/particlelifesim/main.go
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: particlelifesim-macos
+        path: out/bin/particlelifesim-macos
 
   build-windows:
     name: Build on windows-latest
@@ -74,6 +89,11 @@ jobs:
       run: |
         go build -o out/bin/particlelifesim-windows cmd/particlelifesim/main.go
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: particlelifesim-windows
+        path: out/bin/particlelifesim-windows
+
   releases:
     name: Release
     needs: [build-linux, build-macos, build-windows]
@@ -87,6 +107,10 @@ jobs:
         fetch-depth: 0
         
     - run: git fetch --force --tags
+
+    - uses: actions/download-artifact@v3
+      with:
+        path: out/bin/
 
     - name: Update CHANGELOG
       id: changelog
