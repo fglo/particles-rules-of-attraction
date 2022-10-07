@@ -65,13 +65,13 @@ jobs:
 
     - name: Build (macOS)
       run: |
-        go build -o out/bin/particlelifesim-macos cmd/particlelifesim/main.go
+        go build -o out/bin/particlelifesim-macos.app cmd/particlelifesim/main.go
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: particlelifesim-macos
-        path: out/bin/particlelifesim-macos
+        path: out/bin/particlelifesim-macos.app
 
   build-windows:
     name: Build on windows-latest
@@ -90,13 +90,13 @@ jobs:
 
     - name: Build (Windows)
       run: |
-        go build -o out/bin/particlelifesim-windows cmd/particlelifesim/main.go
+        go build -o out/bin/particlelifesim-windows.exe cmd/particlelifesim/main.go
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: particlelifesim-windows
-        path: out/bin/particlelifesim-windows
+        path: out/bin/particlelifesim-windows.exe
 
   releases:
     name: Release
@@ -106,11 +106,8 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        
-    - run: git fetch --force --tags
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Download artifacts
       uses: actions/download-artifact@v3
@@ -136,42 +133,42 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
-    - name: upload linux artifact
+    - name: Upload linux artifact
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./out/bin/particlelifesim-linux
-        asset_name: particlelifesim-linux.zip
+        asset_name: particlelifesim-linux
         asset_content_type: application/gzip
 
-    - name: upload wasm artifact
+    - name: Upload wasm artifact
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-wasm
-        asset_name: particlelifesim-wasm.zip
+        asset_path: ./out/bin/particlelifesim.wasm
+        asset_name: particlelifesim.wasm
         asset_content_type: application/gzip
 
-    - name: upload macos artifact
+    - name: Upload macos artifact
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-macos
-        asset_name: particlelifesim-macos.zip
+        asset_path: ./out/bin/particlelifesim-macos.app
+        asset_name: particlelifesim-macos.app
         asset_content_type: application/gzip
 
-    - name: upload windows artifact
+    - name: Upload windows artifact
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/bin/particlelifesim-windows
-        asset_name: particlelifesim-windows.zip
+        asset_path: ./out/bin/particlelifesim-windows.exe
+        asset_name: particlelifesim-windows.exe
         asset_content_type: application/gzip
