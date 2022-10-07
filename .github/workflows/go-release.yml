@@ -122,7 +122,9 @@ jobs:
         tag: ${{ github.ref_name }}
 
     - name: Zip macos artifact for deployment
-      run: zip ./out/bin/particlelifesim-macos/particlelifesim-macos.zip ./out/bin/particlelifesim-macos/particlelifesim-macos.app
+      run: |
+        cd ./out/bin/particlelifesim-macos/
+        zip particlelifesim-macos.zip particlelifesim-macos.app
       
     - name: Release
       uses: softprops/action-gh-release@v1
