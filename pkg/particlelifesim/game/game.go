@@ -34,7 +34,6 @@ type Game struct {
 
 	quitIsPressed    bool
 	restartIsPressed bool
-	pauseIsPressed   bool
 	forwardIsPressed bool
 	debugIsToggled   bool
 }
@@ -140,8 +139,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.board.Draw(g.boardImage)
 	op := &ebiten.DrawImageOptions{}
-	sw, sh := screen.Size()
-	bw, bh := g.boardImage.Size()
+
+	screenBounds := screen.Bounds()
+	sw := screenBounds.Dx()
+	sh := screenBounds.Dy()
+
+	boardImageBounds := g.boardImage.Bounds()
+	bw := boardImageBounds.Dx()
+	bh := boardImageBounds.Dy()
+
 	x := (sw - bw) / 2
 	y := (sh - bh) / 2
 	op.GeoM.Translate(float64(x), float64(y))
