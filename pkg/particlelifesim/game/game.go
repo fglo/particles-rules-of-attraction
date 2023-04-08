@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"math/rand"
 	"strings"
@@ -35,6 +36,7 @@ type Game struct {
 	restartIsPressed bool
 	pauseIsPressed   bool
 	forwardIsPressed bool
+	debugIsToggled   bool
 }
 
 // New generates a new Game object.
@@ -48,10 +50,15 @@ func New() *Game {
 	g.board = board.New(g.screenWidth, g.screenHeight)
 	g.board.Setup(g.numberOfParticles)
 
-	ebiten.SetWindowSize(g.screenWidth*2, g.screenHeight*2)
+	ebiten.SetWindowSize(g.getWindowSize())
 	ebiten.SetWindowTitle("Particles' Rules of Attraction")
 
 	return g
+}
+
+func (g *Game) getWindowSize() (int, int) {
+	var factor float32 = 1.8
+	return int(float32(g.screenWidth) * factor), int(float32(g.screenHeight) * factor)
 }
 
 // Layout implements ebiten.Game's Layout.
@@ -69,6 +76,7 @@ func (g *Game) Update() error {
 	g.checkRestartButton()
 	g.checkPauseButton()
 	g.checkForwardButton()
+	g.checkDebugButton()
 	// g.input.Update()
 	if err := g.board.Update(); err != nil {
 		return err
@@ -98,11 +106,7 @@ func (g *Game) checkRestartButton() {
 }
 
 func (g *Game) checkPauseButton() {
-	if !g.pauseIsPressed && (inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace)) {
-		g.pauseIsPressed = true
-	}
-	if g.pauseIsPressed && (inpututil.IsKeyJustReleased(ebiten.KeyP) || inpututil.IsKeyJustReleased(ebiten.KeySpace)) {
-		g.pauseIsPressed = false
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		g.board.TogglePause()
 	}
 }
@@ -115,6 +119,12 @@ func (g *Game) checkForwardButton() {
 	if g.forwardIsPressed && (inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyArrowRight)) {
 		g.forwardIsPressed = false
 		g.board.Forward(false)
+	}
+}
+
+func (g *Game) checkDebugButton() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		g.debugIsToggled = !g.debugIsToggled
 	}
 }
 
@@ -139,11 +149,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) drawInstructions(screen *ebiten.Image) {
+
 	instructions := []string{
 		" P: pause/unpause",
 		" F: play paused sim",
 		" R: restart",
 		" Q: quit",
+	}
+	if g.debugIsToggled {
+		instructions = append([]string{fmt.Sprintf(" TPS: %0.2f\n FPS: %0.2f", ebiten.ActualTPS(), ebiten.ActualFPS())}, instructions...)
 	}
 	ebitenutil.DebugPrint(screen, strings.Join(instructions, "\n"))
 }

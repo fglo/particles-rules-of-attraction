@@ -7,6 +7,9 @@ Program simulating particles' rules of attraction.
 
 It's heavily inspired by [hunar4321's life_code](https://github.com/hunar4321/life_code) (it started as a port of his javascript code).
 
+https://evolution.berkeley.edu/the-history-of-evolutionary-thought/1900-to-present/endosymbiosis-lynn-margulis/
+https://www.ventrella.com/Clusters/
+
 ## Gif
 
 500 particles of each color:
