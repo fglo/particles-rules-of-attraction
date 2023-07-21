@@ -40,13 +40,14 @@ type Game struct {
 
 // New generates a new Game object.
 func New() *Game {
-	g := new(Game)
-	g.screenWidth = screenWidth
-	g.screenHeight = screenHeight
-	g.numberOfParticles = numberOfParticles
+	g := &Game{
+		screenWidth:       screenWidth,
+		screenHeight:      screenHeight,
+		numberOfParticles: numberOfParticles,
+		// input =  NewInput(),
+		board: board.New(screenWidth, screenHeight),
+	}
 
-	// g.input =  NewInput()
-	g.board = board.New(g.screenWidth, g.screenHeight)
 	g.board.Setup(g.numberOfParticles)
 
 	ebiten.SetWindowSize(g.getWindowSize())
