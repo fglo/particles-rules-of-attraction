@@ -3,7 +3,7 @@ module github.com/fglo/particles-rules-of-attraction
 go 1.19
 
 require (
-	github.com/hajimehoshi/ebiten/v2 v2.5.1
+	github.com/hajimehoshi/ebiten/v2 v2.5.5
 	golang.org/x/exp v0.0.0-20221002003631-540bb7301a08
 )
 

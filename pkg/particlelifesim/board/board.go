@@ -2,7 +2,6 @@ package board
 
 import (
 	image "image/color"
-	"math"
 	"math/rand"
 	"sync"
 
@@ -11,6 +10,7 @@ import (
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/color"
+	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/common"
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/particle"
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/rule"
 )
@@ -23,7 +23,7 @@ type Board struct {
 	width  int
 	height int
 
-	rules map[string]rule.Rule
+	rulesOfAttraction map[string]rule.Rule
 
 	paused    bool
 	forwarded bool
@@ -32,12 +32,12 @@ type Board struct {
 
 // New is a Board constructor
 func New(w, h int) *Board {
-	b := new(Board)
-
-	b.width = w
-	b.height = h
-	b.particlesByName = make(map[string]*particle.ParticleList)
-	b.particleNames = make([]string, 0)
+	b := &Board{
+		width:           w,
+		height:          h,
+		particlesByName: make(map[string]*particle.ParticleList),
+		particleNames:   make([]string, 0),
+	}
 
 	return b
 }
@@ -71,7 +71,7 @@ func (b *Board) Setup(numberOfParticles int) {
 	b.createParticles("white", numberOfParticles, color.WHITE)
 	b.createParticles("teal", numberOfParticles, color.TEAL)
 
-	b.rules = rule.GenerateRandomRules(b.particleNames)
+	b.rulesOfAttraction = rule.GenerateRandomRules(b.particleNames)
 	b.paused = false
 }
 
@@ -127,60 +127,77 @@ func (b *Board) applyRules() {
 }
 
 func (b *Board) applyRule(p1Name string) {
+	leftMouseIsPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	rightMouseIsPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight)
+	cursorPosX, cursorPosY := ebiten.CursorPosition()
+
 	for i1, p1 := range b.particlesByName[p1Name].Particles {
-		fx, fy := 0.0, 0.0
+		var fx, fy float32 = 0.0, 0.0
+
+		chanfx := make(chan float32)
+		chanfy := make(chan float32)
+
 		for p2Name, pl := range b.particlesByName {
-			g := b.getAttractionForceBetweenParticles(p1Name, p2Name)
-			for i2, p2 := range pl.Particles {
-				if i1 == i2 && p1Name == p2Name {
-					continue
-				}
+			go func(p1Name, p2Name string, pl *particle.ParticleList, chanfx, chanfy chan float32) {
+				var fx, fy float32 = 0.0, 0.0
+				g := b.rulesOfAttraction[p1Name][p2Name]
 
-				dx := float64(p1.X - p2.X)
-				dy := float64(p1.Y - p2.Y)
+				for i2, p2 := range pl.Particles {
+					if i1 == i2 && p1Name == p2Name {
+						continue
+					}
 
-				if dx != 0 || dy != 0 {
-					d := dx*dx + dy*dy
-					if d < 6400 {
-						F := g / math.Sqrt(d)
-						fx += F * dx
-						fy += F * dy
+					dx := float32(p1.X - p2.X)
+					dy := float32(p1.Y - p2.Y)
+
+					if dx != 0 || dy != 0 {
+						d := dx*dx + dy*dy
+						if d < 6400 {
+							F := g * common.FastInvSqrt32(d)
+							fx += F * dx
+							fy += F * dy
+						}
 					}
 				}
-			}
+
+				chanfx <- fx
+				chanfy <- fy
+			}(p1Name, p2Name, pl, chanfx, chanfy)
 		}
 
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			cursorPosX, cursorPosY := ebiten.CursorPosition()
+		switch {
+		case leftMouseIsPressed:
+			var g float32 = -32.
 
-			g := -64.0
-
-			dx := float64(p1.X - cursorPosX)
-			dy := float64(p1.Y - cursorPosY)
+			dx := float32(p1.X - cursorPosX)
+			dy := float32(p1.Y - cursorPosY)
 
 			if dx != 0 || dy != 0 {
 				d := dx*dx + dy*dy
-				F := g / math.Sqrt(d)
+				F := g * common.FastInvSqrt32(d)
 				fx += F * dx
 				fy += F * dy
 			}
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-			cursorPosX, cursorPosY := ebiten.CursorPosition()
+		case rightMouseIsPressed:
+			var g float32 = 32.
 
-			g := 64.0
-
-			dx := float64(p1.X - cursorPosX)
-			dy := float64(p1.Y - cursorPosY)
+			dx := float32(p1.X - cursorPosX)
+			dy := float32(p1.Y - cursorPosY)
 
 			if dx != 0 || dy != 0 {
 				d := dx*dx + dy*dy
-				F := g / math.Sqrt(d)
+				F := g * common.FastInvSqrt32(d)
 				fx += F * dx
 				fy += F * dy
 			}
 		}
 
-		factor := 0.1
+		for range b.particlesByName {
+			fx += <-chanfx
+			fy += <-chanfy
+		}
+
+		var factor float32 = .2
 
 		p1.Vx = (p1.Vx + fx) * factor
 		if p1.Vx >= 1 || p1.Vx <= -1 {
@@ -206,8 +223,4 @@ func (b *Board) applyRule(p1Name string) {
 			}
 		}
 	}
-}
-
-func (b *Board) getAttractionForceBetweenParticles(p1Name, p2Name string) float64 {
-	return b.rules[p1Name][p2Name]
 }

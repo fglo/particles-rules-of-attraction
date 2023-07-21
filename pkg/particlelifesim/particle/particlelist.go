@@ -11,10 +11,9 @@ type ParticleList struct {
 }
 
 func NewList(name string, color color.Color) *ParticleList {
-	pl := new(ParticleList)
-	pl.Name = name
-	pl.Color = color
-	pl.Particles = make([]*Particle, 0)
-
-	return pl
+	return &ParticleList{
+		Name:      name,
+		Color:     color,
+		Particles: make([]*Particle, 0),
+	}
 }
