@@ -67,8 +67,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) restart() {
-	g.board.Setup(g.numberOfParticles)
 	g.boardImage.Clear()
+	g.board.Setup(g.numberOfParticles)
 }
 
 // Update updates the current game state.
