@@ -13,3 +13,10 @@ func New(x, y float32) *Particle {
 		Y: y,
 	}
 }
+
+func (p *Particle) Clone() *Particle {
+	return &Particle{
+		X: p.X,
+		Y: p.Y,
+	}
+}

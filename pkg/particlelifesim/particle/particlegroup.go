@@ -2,7 +2,6 @@ package particle
 
 import (
 	"image/color"
-	"math"
 	"math/rand"
 )
 
@@ -13,35 +12,34 @@ type ParticleGroup struct {
 	initialPositions []Particle
 }
 
-func NewGroup(name string, color color.Color, initialPositions []Particle) *ParticleGroup {
-	return &ParticleGroup{
+func NewGroup(name string, color color.Color, numberOfParticles int) *ParticleGroup {
+	group := &ParticleGroup{
 		Name:             name,
 		Color:            color,
-		Particles:        make([]*Particle, 0),
-		initialPositions: initialPositions,
+		Particles:        createParticles(numberOfParticles),
+		initialPositions: make([]Particle, 0),
 	}
+
+	for _, p := range group.Particles {
+		group.initialPositions = append(group.initialPositions, *p)
+	}
+
+	return group
 }
 
 func (pg *ParticleGroup) ResetPosition() {
-	pg.Particles = placeParticles(len(pg.Particles), pg.initialPositions)
+	for i, p := range pg.initialPositions {
+		pg.Particles[i] = p.Clone()
+	}
 }
 
-func placeParticles(n int, p []Particle) (ptcs []*Particle) {
-	nClusters := len(p)
-	if nClusters <= 0 {
-		// Place particles randonly if no clusters are passed
-		for i := 0; i < n; i++ {
-			p := New(rand.Int(), rand.Int())
-			ptcs = append(ptcs, p)
-		}
-	} else {
-		// Place particles proportionally in each clusters
-		for i := 0; i < n; i++ {
-			tIndex := int(math.Mod(float64(i), float64(nClusters)))
-			tParticle := p[tIndex]
-			p := New(tParticle.X, tParticle.Y)
-			ptcs = append(ptcs, p)
-		}
+func createParticles(numberOfParticles int) []*Particle {
+	particles := make([]*Particle, 0)
+
+	for i := 0; i < numberOfParticles; i++ {
+		p := New(rand.Float32(), rand.Float32())
+		particles = append(particles, p)
 	}
-	return ptcs
+
+	return particles
 }
