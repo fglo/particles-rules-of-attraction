@@ -3,7 +3,7 @@ GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
 BINARY_NAME=particlelifesim
 PATH_TO_MAIN_GO=cmd/particlelifesim/main.go
-VERSION?=0.0.0
+VERSION?=0.0.1
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 
 GREEN  := $(shell tput -Txterm setaf 2)
