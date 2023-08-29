@@ -174,8 +174,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.board.Draw(g.boardImage, g.debugIsToggled, mouse)
 
-	sw, sh := screen.Size()
-	bw, bh := g.boardImage.Size()
+	sw := screen.Bounds().Dx()
+	sh := screen.Bounds().Dy()
+	bw := g.boardImage.Bounds().Dx()
+	bh := g.boardImage.Bounds().Dy()
 
 	x := (sw - bw) / 2
 	y := (sh - bh) / 2
