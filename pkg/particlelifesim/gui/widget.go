@@ -85,9 +85,6 @@ func (w *widget) Size() (int, int) {
 }
 
 func (w *widget) FireEvents(mouse *input.Mouse) {
-	// posX, posY := w.Position()
-	// width, height := w.Size()
-	// mouseEntered := mouse.CursorPosX > int(posX) && mouse.CursorPosX < int(posX)+width && mouse.CursorPosY > int(posY) && mouse.CursorPosY < int(posY)+height
 	p := image.Point{mouse.CursorPosX, mouse.CursorPosY}
 	mouseEntered := p.In(w.Rect)
 
@@ -98,10 +95,19 @@ func (w *widget) FireEvents(mouse *input.Mouse) {
 			w.lastUpdateMouseLeftButtonPressed = true
 			w.MouseButtonPressedEvent.Fire(&WidgetMouseButtonPressedEventArgs{
 				Widget: w,
+				Button: ebiten.MouseButtonLeft,
 			})
 		} else {
 			w.CursorEnterEvent.Fire(&WidgetCursorEnterEventArgs{
 				Widget: w,
+			})
+		}
+
+		if mouse.RightButtonJustPressed {
+			w.lastUpdateMouseRightButtonPressed = true
+			w.MouseButtonPressedEvent.Fire(&WidgetMouseButtonPressedEventArgs{
+				Widget: w,
+				Button: ebiten.MouseButtonRight,
 			})
 		}
 	} else {
@@ -116,6 +122,16 @@ func (w *widget) FireEvents(mouse *input.Mouse) {
 		w.MouseButtonReleasedEvent.Fire(&WidgetMouseButtonReleasedEventArgs{
 			Widget: w,
 			Inside: mouseEntered,
+			Button: ebiten.MouseButtonLeft,
+		})
+	}
+
+	if !mouse.RightButtonPressed && w.lastUpdateMouseRightButtonPressed {
+		w.lastUpdateMouseRightButtonPressed = false
+		w.MouseButtonReleasedEvent.Fire(&WidgetMouseButtonReleasedEventArgs{
+			Widget: w,
+			Inside: mouseEntered,
+			Button: ebiten.MouseButtonRight,
 		})
 	}
 }

@@ -135,7 +135,7 @@ func (b *Button) createWidget(posX, posY float64, width, height int) widget {
 	})
 
 	widgetOptions.MouseButtonPressedHandler(func(args *WidgetMouseButtonPressedEventArgs) {
-		if !b.disabled {
+		if !b.disabled && args.Button == ebiten.MouseButtonLeft {
 			b.pressed = true
 			b.PressedEvent.Fire(&ButtonPressedEventArgs{
 				Button: b,
@@ -144,7 +144,7 @@ func (b *Button) createWidget(posX, posY float64, width, height int) widget {
 	})
 
 	widgetOptions.MouseButtonReleasedHandler(func(args *WidgetMouseButtonReleasedEventArgs) {
-		if !b.disabled {
+		if !b.disabled && args.Button == ebiten.MouseButtonLeft {
 			b.pressed = false
 			b.ReleasedEvent.Fire(&ButtonReleasedEventArgs{
 				Button: b,
