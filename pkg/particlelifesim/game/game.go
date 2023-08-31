@@ -26,12 +26,11 @@ var (
 
 // Game encapsulates game logic
 type Game struct {
-	// input      *Input
 	board      *board.Board
 	boardImage *ebiten.Image
 	guiImage   *ebiten.Image
 
-	mouse input.Mouse
+	mouse *input.Mouse
 
 	screenWidth  int
 	screenHeight int
@@ -43,12 +42,14 @@ type Game struct {
 	debugIsToggled   bool
 }
 
+const guiWidth = 60
+
 // New generates a new Game object.
 func New() *Game {
 	g := &Game{
-		screenWidth:  screenWidth + 50,
+		screenWidth:  screenWidth + guiWidth,
 		screenHeight: screenHeight,
-		// input =  NewInput(),
+		mouse:        input.NewMouse(),
 	}
 
 	simEngine := simulation.New(numberOfParticles, symmetricRules, maxEffectDistance, terminalVelocity, particleDisplacementFactor, particleRepulsionFactor, mouseGravityForce, mouseGravityEffectDistance, wrapped)
@@ -90,7 +91,6 @@ func (g *Game) Update() error {
 	g.checkForwardButton()
 	g.checkDebugButton()
 
-	// g.input.Update()
 	g.mouse.Update()
 
 	if err := g.board.Update(); err != nil {
@@ -161,6 +161,8 @@ func (g *Game) checkDebugButton() {
 
 // Draw draws the current game to the given screen.
 func (g *Game) Draw(screen *ebiten.Image) {
+	g.mouse.Draw()
+
 	if g.boardImage == nil {
 		w, h := g.board.Size()
 		g.boardImage = ebiten.NewImage(w, h)
@@ -168,7 +170,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if g.guiImage == nil {
 		_, h := g.board.Size()
-		g.guiImage = ebiten.NewImage(50, h)
+		g.guiImage = ebiten.NewImage(guiWidth, h)
 	}
 
 	screen.Fill(imgColor.RGBA{9, 32, 42, 255})
@@ -176,23 +178,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.board.Draw(g.boardImage, g.guiImage, g.debugIsToggled, g.mouse)
 
-	// sw := screen.Bounds().Dx()
-	// sh := screen.Bounds().Dy()
-	// bw := g.boardImage.Bounds().Dx()
-	// bh := g.boardImage.Bounds().Dy()
-	// x := (sw-bw)/2 + 50
-	// y := (sh - bh) / 2
 	op := &ebiten.DrawImageOptions{}
-	// op.GeoM.Translate(float64(x), float64(y))
-	op.GeoM.Translate(50, 0)
+	op.GeoM.Translate(guiWidth, 0)
 	screen.DrawImage(g.boardImage, op)
 
-	// bw = g.guiImage.Bounds().Dx()
-	// bh = g.guiImage.Bounds().Dy()
-	// x = (sw - bw) / 2
-	// y = (sh - bh) / 2
 	op = &ebiten.DrawImageOptions{}
-	// op.GeoM.Translate(float64(x), float64(y))
 	screen.DrawImage(g.guiImage, op)
 }
 

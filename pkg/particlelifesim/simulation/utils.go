@@ -5,5 +5,5 @@ import (
 )
 
 func randFloat32() float32 {
-	return (rand.Float32() - .5)
+	return (rand.Float32() - .5) / 2
 }

@@ -26,12 +26,17 @@ func New(w, h int, se *simulation.SimulationEngine) *Board {
 		gui:    &gui.Gui{},
 	}
 
-	cb1 := gui.NewCheckBox(5, 100)
-	cb1.Toggle()
+	// cb1 := gui.NewCheckBox(5, 100, se.SetWrapped)
+	cbOpts := &gui.CheckBoxOptions{}
+	cbWrapped := gui.NewCheckBox(5, 100, cbOpts.ToggledHandler(func(args *gui.CheckBoxToggledEventArgs) {
+		se.SetWrapped(args.CheckBox.Checked)
+	}))
+	cbWrapped.Toggle()
+	b.gui.AddComponent(cbWrapped)
 
-	b.gui.AddComponent(cb1)
-	b.gui.AddComponent(gui.NewCheckBox(5, 115))
-	b.gui.AddComponent(gui.NewCheckBox(5, 130))
+	btnOpts := &gui.ButtonOptions{}
+	btn := gui.NewButton(5, 115, btnOpts.ClickedHandler(func(args *gui.ButtonClickedEventArgs) { b.TogglePause() }))
+	b.gui.AddComponent(btn)
 
 	return b
 }
@@ -75,17 +80,17 @@ func (b *Board) Size() (w, h int) {
 }
 
 // Draw draws board
-func (b *Board) Draw(boardImage, guiImage *ebiten.Image, debugIsToggled bool, mouse input.Mouse) {
+func (b *Board) Draw(boardImage, guiImage *ebiten.Image, debugIsToggled bool, mouse *input.Mouse) {
 	b.drawParticles(boardImage, mouse)
 	b.drawGui(guiImage, mouse)
 }
 
-func (b *Board) drawGui(guiImage *ebiten.Image, mouse input.Mouse) {
+func (b *Board) drawGui(guiImage *ebiten.Image, mouse *input.Mouse) {
 	b.gui.Update(mouse)
-	b.gui.Draw(guiImage)
+	b.gui.Draw(guiImage, mouse)
 }
 
-func (b *Board) drawParticles(boardImage *ebiten.Image, mouse input.Mouse) {
+func (b *Board) drawParticles(boardImage *ebiten.Image, mouse *input.Mouse) {
 	if !b.se.Paused || b.se.Forwarded {
 		mouse.CursorPosXNormalized = float32(mouse.CursorPosX) / float32(b.width)
 		mouse.CursorPosYNormalized = float32(mouse.CursorPosY) / float32(b.height)
