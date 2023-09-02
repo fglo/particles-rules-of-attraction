@@ -176,7 +176,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(imgColor.RGBA{9, 32, 42, 255})
 	g.drawInstructions(screen)
 
-	g.board.Draw(g.boardImage, g.guiImage, g.debugIsToggled, g.mouse)
+	g.board.Draw(screen, g.boardImage, g.guiImage, g.debugIsToggled, g.mouse)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(guiWidth, 0)

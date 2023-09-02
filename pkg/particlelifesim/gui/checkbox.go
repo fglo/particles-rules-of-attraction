@@ -28,8 +28,10 @@ func NewCheckBox(posX, posY float64, options *CheckBoxOptions) *CheckBox {
 		ToggledEvent: &Event{},
 	}
 
-	for _, o := range options.opts {
-		o(cb)
+	if options != nil {
+		for _, o := range options.opts {
+			o(cb)
+		}
 	}
 
 	cb.widget = cb.createWidget(posX, posY, 10, 10)
@@ -59,34 +61,51 @@ func (cb *CheckBox) Toggle() {
 }
 
 func (cb *CheckBox) Draw() *ebiten.Image {
-	rows := cb.height
-	cols := cb.width * 4
-	arr := make([]byte, rows*cols)
+	if cb.Checked {
+		cb.image.WritePixels(cb.drawChecked())
+	} else {
+		cb.image.WritePixels(cb.drawUnchecked())
+	}
 
-	lastRowId := rows - 1
-	penultimateRowId := lastRowId - 1
-	lastColId := cols - 4
-	penultimateColId := lastColId - 4
+	return cb.image
+}
 
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j += 4 {
-			if i == 0 || i == lastRowId || j == 0 || j == lastColId || (cb.Checked && j > 4 && j < penultimateColId && i > 1 && i < penultimateRowId) {
-				arr[j+cols*i] = 230
-				arr[j+1+cols*i] = 230
-				arr[j+2+cols*i] = 230
-				arr[j+3+cols*i] = 255
-			} else if !cb.Checked && j > 4 && j < 32 && i > 1 && i < 8 {
-				arr[j+cols*i] = 9
-				arr[j+1+cols*i] = 32
-				arr[j+2+cols*i] = 42
-				arr[j+3+cols*i] = 255
+func (cb *CheckBox) drawUnchecked() []byte {
+	arr := make([]byte, cb.pixelRows*cb.pixelCols)
+
+	for i := 0; i < cb.pixelRows; i++ {
+		for j := 0; j < cb.pixelCols; j += 4 {
+			if i == 0 || i == cb.lastPixelRowId || j == 0 || j == cb.lastPixelColId {
+				arr[j+cb.pixelCols*i] = 230
+				arr[j+1+cb.pixelCols*i] = 230
+				arr[j+2+cb.pixelCols*i] = 230
+			} else {
+				arr[j+cb.pixelCols*i] = 9
+				arr[j+1+cb.pixelCols*i] = 32
+				arr[j+2+cb.pixelCols*i] = 42
 			}
+			arr[j+3+cb.pixelCols*i] = 255
 		}
 	}
 
-	cb.image.WritePixels(arr)
+	return arr
+}
 
-	return cb.image
+func (cb *CheckBox) drawChecked() []byte {
+	arr := make([]byte, cb.pixelRows*cb.pixelCols)
+
+	for i := 0; i < cb.pixelRows; i++ {
+		for j := 0; j < cb.pixelCols; j += 4 {
+			if i == 0 || i == cb.lastPixelRowId || j == 0 || j == cb.lastPixelColId || (j > 4 && j < cb.penultimatePixelColId && i > 1 && i < cb.penultimatePixelRowId) {
+				arr[j+cb.pixelCols*i] = 230
+				arr[j+1+cb.pixelCols*i] = 230
+				arr[j+2+cb.pixelCols*i] = 230
+			}
+			arr[j+3+cb.pixelCols*i] = 255
+		}
+	}
+
+	return arr
 }
 
 func (cb *CheckBox) createWidget(posX, posY float64, width, height int) widget {

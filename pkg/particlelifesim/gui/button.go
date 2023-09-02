@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"image/color"
+
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -13,6 +15,8 @@ type Button struct {
 	PressedEvent  *Event
 	ReleasedEvent *Event
 	ClickedEvent  *Event
+
+	Label *Label
 }
 
 type ButtonOpt func(b *Button)
@@ -46,13 +50,33 @@ func NewButton(posX, posY float64, options *ButtonOptions) *Button {
 		ClickedEvent:  &Event{},
 	}
 
-	for _, o := range options.opts {
-		o(b)
+	if options != nil {
+		for _, o := range options.opts {
+			o(b)
+		}
 	}
 
 	b.widget = b.createWidget(posX, posY, 45, 15)
 
 	return b
+}
+
+func (o *ButtonOptions) Text(posX, posY float64, text string, color color.RGBA) *ButtonOptions {
+	label := NewLabel(posX, 15, text, color, &LabelOptions{})
+
+	o.PressedHandler(func(args *ButtonPressedEventArgs) {
+		label.Inverted = true
+	})
+
+	o.ReleasedHandler(func(args *ButtonReleasedEventArgs) {
+		label.Inverted = false
+	})
+
+	o.opts = append(o.opts, func(b *Button) {
+		b.Label = label
+	})
+
+	return o
 }
 
 func (o *ButtonOptions) PressedHandler(f ButtonPressedHandlerFunc) *ButtonOptions {
@@ -86,39 +110,91 @@ func (o *ButtonOptions) ClickedHandler(f ButtonClickedHandlerFunc) *ButtonOption
 }
 
 func (b *Button) Draw() *ebiten.Image {
-	cols := b.width * 4
-	rows := b.height
-	arr := make([]byte, rows*cols)
+	if b.pressed {
+		b.image.WritePixels(b.drawPressed())
+	} else if b.hovering {
+		b.image.WritePixels(b.drawHovered())
+	} else {
+		b.image.WritePixels(b.draw())
+	}
 
-	lastRowId := rows - 1
-	lastColId := cols - 4
+	if b.Label != nil {
+		b.Label.DrawCentered(b.image, (b.Rect.Max.X-b.Rect.Min.X)/2, (b.Rect.Max.Y-b.Rect.Min.Y)/2+1)
+		// opts := &ebiten.DrawImageOptions{}
+		// opts.GeoM.Translate(float64((b.Rect.Max.X-b.Rect.Min.X)/2), float64((b.Rect.Max.Y-b.Rect.Min.Y)/2+1))
+		// b.image.DrawImage(b.Label.Draw(), opts)
+	}
 
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j += 4 {
-			if i == 0 || i == lastRowId || j == 0 || j == lastColId {
-				arr[j+cols*i] = 230
-				arr[j+1+cols*i] = 230
-				arr[j+2+cols*i] = 230
-			} else if b.pressed {
-				arr[j+cols*i] = 200
-				arr[j+1+cols*i] = 200
-				arr[j+2+cols*i] = 200
-			} else if b.hovering {
-				arr[j+cols*i] = 220
-				arr[j+1+cols*i] = 220
-				arr[j+2+cols*i] = 220
-			} else {
-				arr[j+cols*i] = 240
-				arr[j+1+cols*i] = 240
-				arr[j+2+cols*i] = 240
+	return b.image
+}
+
+func (b *Button) draw() []byte {
+	arr := make([]byte, b.pixelRows*b.pixelCols)
+
+	for i := 0; i < b.pixelRows; i++ {
+		for j := 0; j < b.pixelCols; j += 4 {
+			if i == 0 && (j == 0 || j == b.lastPixelColId) || i == b.lastPixelRowId && (j == 0 || j == b.lastPixelColId) {
+				continue
+			} else if i == 0 || i == b.lastPixelRowId || j == 0 || j == b.lastPixelColId {
+				arr[j+b.pixelCols*i] = 230
+				arr[j+1+b.pixelCols*i] = 230
+				arr[j+2+b.pixelCols*i] = 230
+			} else if j > 4 && j < b.penultimatePixelColId && i > 1 && i < b.penultimatePixelRowId {
+				arr[j+b.pixelCols*i] = 230
+				arr[j+1+b.pixelCols*i] = 230
+				arr[j+2+b.pixelCols*i] = 230
 			}
-			arr[j+3+cols*i] = 255
+			arr[j+3+b.pixelCols*i] = 255
 		}
 	}
 
-	b.image.WritePixels(arr)
+	return arr
+}
 
-	return b.image
+func (b *Button) drawPressed() []byte {
+	arr := make([]byte, b.pixelRows*b.pixelCols)
+
+	for i := 0; i < b.pixelRows; i++ {
+		for j := 0; j < b.pixelCols; j += 4 {
+			if i == 0 && (j == 0 || j == b.lastPixelColId) || i == b.lastPixelRowId && (j == 0 || j == b.lastPixelColId) {
+				continue
+			} else if i == 0 || i == b.lastPixelRowId || j == 0 || j == b.lastPixelColId {
+				arr[j+b.pixelCols*i] = 200
+				arr[j+1+b.pixelCols*i] = 200
+				arr[j+2+b.pixelCols*i] = 200
+			} else if j > 4 && j < b.penultimatePixelColId && i > 1 && i < b.penultimatePixelRowId {
+				arr[j+b.pixelCols*i] = 9
+				arr[j+1+b.pixelCols*i] = 32
+				arr[j+2+b.pixelCols*i] = 42
+			}
+			arr[j+3+b.pixelCols*i] = 255
+		}
+	}
+
+	return arr
+}
+
+func (b *Button) drawHovered() []byte {
+	arr := make([]byte, b.pixelRows*b.pixelCols)
+
+	for i := 0; i < b.pixelRows; i++ {
+		for j := 0; j < b.pixelCols; j += 4 {
+			if i == 0 && (j == 0 || j == b.lastPixelColId) || i == b.lastPixelRowId && (j == 0 || j == b.lastPixelColId) {
+				continue
+			} else if i == 0 || i == b.lastPixelRowId || j == 0 || j == b.lastPixelColId {
+				arr[j+b.pixelCols*i] = 220
+				arr[j+1+b.pixelCols*i] = 220
+				arr[j+2+b.pixelCols*i] = 220
+			} else if j > 4 && j < b.penultimatePixelColId && i > 1 && i < b.penultimatePixelRowId {
+				arr[j+b.pixelCols*i] = 200
+				arr[j+1+b.pixelCols*i] = 200
+				arr[j+2+b.pixelCols*i] = 200
+			}
+			arr[j+3+b.pixelCols*i] = 255
+		}
+	}
+
+	return arr
 }
 
 func (b *Button) createWidget(posX, posY float64, width, height int) widget {

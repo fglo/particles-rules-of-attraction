@@ -1,6 +1,8 @@
 package board
 
 import (
+	"image/color"
+
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/fglo/particles-rules-of-attraction/pkg/particlelifesim/gui"
@@ -35,8 +37,12 @@ func New(w, h int, se *simulation.SimulationEngine) *Board {
 	b.gui.AddComponent(cbWrapped)
 
 	btnOpts := &gui.ButtonOptions{}
-	btn := gui.NewButton(5, 115, btnOpts.ClickedHandler(func(args *gui.ButtonClickedEventArgs) { b.TogglePause() }))
+	btn := gui.NewButton(5, 115, btnOpts.ClickedHandler(func(args *gui.ButtonClickedEventArgs) { b.TogglePause() }).Text(5, 20, "pause", color.RGBA{25, 25, 25, 255}))
 	b.gui.AddComponent(btn)
+
+	lblOpts := &gui.LabelOptions{}
+	lbl := gui.NewLabel(5, 135, "label test", color.RGBA{230, 230, 230, 255}, lblOpts.CenteredVertically(70))
+	b.gui.AddComponent(lbl)
 
 	return b
 }
@@ -80,7 +86,7 @@ func (b *Board) Size() (w, h int) {
 }
 
 // Draw draws board
-func (b *Board) Draw(boardImage, guiImage *ebiten.Image, debugIsToggled bool, mouse *input.Mouse) {
+func (b *Board) Draw(screen, boardImage, guiImage *ebiten.Image, debugIsToggled bool, mouse *input.Mouse) {
 	b.drawParticles(boardImage, mouse)
 	b.drawGui(guiImage, mouse)
 }

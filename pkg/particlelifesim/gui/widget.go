@@ -26,6 +26,14 @@ type widget struct {
 	width  int
 	height int
 
+	pixelCols int
+	pixelRows int
+
+	lastPixelRowId        int
+	penultimatePixelRowId int
+	lastPixelColId        int
+	penultimatePixelColId int
+
 	posX float64
 	posY float64
 
@@ -52,6 +60,13 @@ func NewWidget(posX, posY float64, width, height int, options *WidgetOptions) *w
 		posX:   posX,
 		posY:   posY,
 		Rect:   image.Rectangle{Min: image.Point{int(posX), int(posY)}, Max: image.Point{int(posX) + width, int(posY) + height}},
+
+		pixelCols:             width * 4,
+		pixelRows:             height,
+		lastPixelRowId:        height - 1,
+		penultimatePixelRowId: height - 2,
+		lastPixelColId:        width*4 - 4,
+		penultimatePixelColId: width*4 - 8,
 	}
 	for _, o := range options.opts {
 		o(w)

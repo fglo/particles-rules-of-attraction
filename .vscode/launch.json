@@ -9,7 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "cmd/particlelifesim/main.go"
+            "program": "${workspaceFolder}/cmd/particlelifesim/main.go",
+            "cwd": "${workspaceFolder}",
         }
     ]
 }
