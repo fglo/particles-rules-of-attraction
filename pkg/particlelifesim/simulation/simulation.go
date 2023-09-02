@@ -101,13 +101,13 @@ func (se *SimulationEngine) Reset() {
 	}
 }
 
-func (se *SimulationEngine) NextFrame(mouse input.Mouse) []*particle.ParticleGroup {
+func (se *SimulationEngine) NextFrame(mouse *input.Mouse) []*particle.ParticleGroup {
 	se.Update(mouse)
 	return se.particleGroups
 }
 
 // Update performs simulation update
-func (se *SimulationEngine) Update(mouse input.Mouse) {
+func (se *SimulationEngine) Update(mouse *input.Mouse) {
 	var rulesWg sync.WaitGroup
 	rulesWg.Add(len(se.particleGroups))
 
@@ -121,7 +121,7 @@ func (se *SimulationEngine) Update(mouse input.Mouse) {
 	rulesWg.Wait()
 }
 
-func (se *SimulationEngine) applyRule(pg1Index int, mouse input.Mouse) {
+func (se *SimulationEngine) applyRule(pg1Index int, mouse *input.Mouse) {
 	for i1, p1 := range se.particleGroups[pg1Index].Particles {
 		var fx, fy float32 = 0.0, 0.0
 
@@ -170,32 +170,32 @@ func (se *SimulationEngine) applyRule(pg1Index int, mouse input.Mouse) {
 			}(pg1Index, pg2Index, pl, chanfx, chanfy)
 		}
 
-		switch {
-		case mouse.LeftButtonPressed:
-			dx := float32(p1.X - mouse.CursorPosXNormalized)
-			dy := float32(p1.Y - mouse.CursorPosYNormalized)
+		// switch {
+		// case mouse.LeftButtonPressed:
+		// 	dx := float32(p1.X - mouse.CursorPosXNormalized)
+		// 	dy := float32(p1.Y - mouse.CursorPosYNormalized)
 
-			if dx != 0 || dy != 0 {
-				dSquared := dx*dx + dy*dy
-				if dSquared < se.mouseGravityEffectDistance {
-					F := -se.mouseGravityForce * common.FastInvSqrt32(dSquared)
-					fx += F * dx
-					fy += F * dy
-				}
-			}
-		case mouse.RightButtonPressed:
-			dx := float32(p1.X - mouse.CursorPosXNormalized)
-			dy := float32(p1.Y - mouse.CursorPosYNormalized)
+		// 	if dx != 0 || dy != 0 {
+		// 		dSquared := dx*dx + dy*dy
+		// 		if dSquared < se.mouseGravityEffectDistance {
+		// 			F := -se.mouseGravityForce * common.FastInvSqrt32(dSquared)
+		// 			fx += F * dx
+		// 			fy += F * dy
+		// 		}
+		// 	}
+		// case mouse.RightButtonPressed:
+		// 	dx := float32(p1.X - mouse.CursorPosXNormalized)
+		// 	dy := float32(p1.Y - mouse.CursorPosYNormalized)
 
-			if dx != 0 || dy != 0 {
-				dSquared := dx*dx + dy*dy
-				if dSquared < se.mouseGravityEffectDistance {
-					F := se.mouseGravityForce * common.FastInvSqrt32(dSquared)
-					fx += F * dx
-					fy += F * dy
-				}
-			}
-		}
+		// 	if dx != 0 || dy != 0 {
+		// 		dSquared := dx*dx + dy*dy
+		// 		if dSquared < se.mouseGravityEffectDistance {
+		// 			F := se.mouseGravityForce * common.FastInvSqrt32(dSquared)
+		// 			fx += F * dx
+		// 			fy += F * dy
+		// 		}
+		// 	}
+		// }
 
 		for range se.particleGroups {
 			fx += <-chanfx
@@ -248,4 +248,8 @@ func (se *SimulationEngine) moveParticle(coord, velocity, force float32) (float3
 	}
 
 	return coord, velocity
+}
+
+func (se *SimulationEngine) SetWrapped(wrapped bool) {
+	se.wrapped = wrapped
 }

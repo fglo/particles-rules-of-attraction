@@ -26,9 +26,11 @@ var (
 
 // Game encapsulates game logic
 type Game struct {
-	// input      *Input
 	board      *board.Board
 	boardImage *ebiten.Image
+	guiImage   *ebiten.Image
+
+	mouse *input.Mouse
 
 	screenWidth  int
 	screenHeight int
@@ -40,12 +42,14 @@ type Game struct {
 	debugIsToggled   bool
 }
 
+const guiWidth = 60
+
 // New generates a new Game object.
 func New() *Game {
 	g := &Game{
-		screenWidth:  screenWidth,
+		screenWidth:  screenWidth + guiWidth,
 		screenHeight: screenHeight,
-		// input =  NewInput(),
+		mouse:        input.NewMouse(),
 	}
 
 	simEngine := simulation.New(numberOfParticles, symmetricRules, maxEffectDistance, terminalVelocity, particleDisplacementFactor, particleRepulsionFactor, mouseGravityForce, mouseGravityEffectDistance, wrapped)
@@ -86,7 +90,9 @@ func (g *Game) Update() error {
 	g.checkWrappedButton()
 	g.checkForwardButton()
 	g.checkDebugButton()
-	// g.input.Update()
+
+	g.mouse.Update()
+
 	if err := g.board.Update(); err != nil {
 		return err
 	}
@@ -155,36 +161,29 @@ func (g *Game) checkDebugButton() {
 
 // Draw draws the current game to the given screen.
 func (g *Game) Draw(screen *ebiten.Image) {
-	cursorPosX, cursorPosY := ebiten.CursorPosition()
-
-	mouse := input.Mouse{
-		LeftButtonPressed:  ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft),
-		RightButtonPressed: ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight),
-		CursorPosX:         cursorPosX,
-		CursorPosY:         cursorPosY,
-	}
+	g.mouse.Draw()
 
 	if g.boardImage == nil {
 		w, h := g.board.Size()
 		g.boardImage = ebiten.NewImage(w, h)
 	}
 
-	screen.Fill(imgColor.RGBA{9, 32, 42, 100})
+	if g.guiImage == nil {
+		_, h := g.board.Size()
+		g.guiImage = ebiten.NewImage(guiWidth, h)
+	}
+
+	screen.Fill(imgColor.RGBA{9, 32, 42, 255})
 	g.drawInstructions(screen)
 
-	g.board.Draw(g.boardImage, g.debugIsToggled, mouse)
-
-	sw := screen.Bounds().Dx()
-	sh := screen.Bounds().Dy()
-	bw := g.boardImage.Bounds().Dx()
-	bh := g.boardImage.Bounds().Dy()
-
-	x := (sw - bw) / 2
-	y := (sh - bh) / 2
+	g.board.Draw(screen, g.boardImage, g.guiImage, g.debugIsToggled, g.mouse)
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Translate(guiWidth, 0)
 	screen.DrawImage(g.boardImage, op)
+
+	op = &ebiten.DrawImageOptions{}
+	screen.DrawImage(g.guiImage, op)
 }
 
 func (g *Game) drawInstructions(screen *ebiten.Image) {
